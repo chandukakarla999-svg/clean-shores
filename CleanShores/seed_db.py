@@ -1,12 +1,19 @@
 from datetime import datetime, timedelta
 import os
-from app import create_app
 from models import db, User, OrganizerVerification, Drive, DriveReport, DrivePhoto, Participation, Notification, Message
 
-app = create_app()
-
 def seed():
-    with app.app_context():
+    from flask import current_app
+    if current_app:
+        _run_seed()
+    else:
+        from app import create_app
+        _app = create_app()
+        with _app.app_context():
+            _run_seed()
+
+def _run_seed():
+    if True:
         db.create_all()
 
         # Check if already seeded

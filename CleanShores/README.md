@@ -61,6 +61,33 @@ Deploy CleanShores to **Vercel** with zero server management:
 
 ---
 
+## 🗄️ Database Configuration (MySQL)
+
+CleanShores uses **MySQL** as its primary database backend via PyMySQL.
+
+### Environment Configuration:
+Configure your MySQL credentials in `.env`:
+```ini
+# Option 1: Full Connection URL
+DATABASE_URL=mysql+pymysql://root:password@localhost:3306/cleanshores_db
+
+# Option 2: Discrete parameters
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD=
+MYSQL_DATABASE=cleanshores_db
+```
+The application **automatically creates the MySQL database** if it does not already exist.
+
+### Data Migration:
+To migrate data from the old SQLite file into your MySQL database:
+```bash
+python migrate_sqlite_to_mysql.py
+```
+
+---
+
 ## 🔑 Demo Login Accounts
 
 All test accounts are pre-seeded and ready to use immediately:

@@ -17,3 +17,5 @@ env/
 Thumbs.db
 .vscode/
 .idea/
+test_runner.db
+

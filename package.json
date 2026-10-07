@@ -5,6 +5,7 @@
   "scripts": {
     "start": "npm --prefix CleanShores start",
     "dev": "npm --prefix CleanShores run dev",
-    "seed": "npm --prefix CleanShores run seed"
+    "seed": "npm --prefix CleanShores run seed",
+    "migrate:mysql": "npm --prefix CleanShores run migrate:mysql"
   }
 }

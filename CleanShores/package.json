@@ -7,6 +7,7 @@
     "start": "python app.py",
     "dev": "python app.py",
     "seed": "python seed_db.py",
+    "migrate:mysql": "python migrate_sqlite_to_mysql.py",
     "test": "python -c \"import urllib.request; print('HTTP Status:', urllib.request.urlopen('http://127.0.0.1:5000').status)\""
   },
   "keywords": [

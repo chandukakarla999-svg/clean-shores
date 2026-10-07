@@ -2,17 +2,36 @@ import unittest
 import os
 import io
 from datetime import datetime, timedelta
+
+# Ensure isolated test database for unit testing
+test_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'test_runner.db'))
+os.environ['DATABASE_URL'] = f'sqlite:///{test_db_path}'
+
 from app import create_app
 from models import db, User, Drive, OrganizerVerification, Participation
 
 class CleanShoresComprehensiveTest(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        # Configure app for testing
         cls.app = create_app()
         cls.app.config['TESTING'] = True
         cls.app.config['WTF_CSRF_ENABLED'] = False
         cls.client = cls.app.test_client()
+        with cls.app.app_context():
+            db.drop_all()
+            db.create_all()
+            from seed_db import seed
+            seed()
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(test_db_path):
+            try:
+                os.remove(test_db_path)
+            except Exception:
+                pass
+
+
 
     def test_01_public_frontend_pages(self):
         """Test public landing and information pages render with 200 OK"""

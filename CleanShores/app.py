@@ -22,14 +22,42 @@ def create_app():
     db.init_app(app)
 
     with app.app_context():
-        db.create_all()
+        # Auto-create MySQL database if connecting to MySQL
+        db_uri = app.config.get('SQLALCHEMY_DATABASE_URI', '')
+        if 'mysql' in db_uri:
+            try:
+                from sqlalchemy.engine import make_url
+                import pymysql
+                url = make_url(db_uri)
+                if url.database:
+                    conn = pymysql.connect(
+                        host=url.host or 'localhost',
+                        port=int(url.port or 3306),
+                        user=url.username or 'root',
+                        password=url.password or '',
+                        charset='utf8mb4',
+                        connect_timeout=5
+                    )
+                    with conn.cursor() as cursor:
+                        cursor.execute(f"CREATE DATABASE IF NOT EXISTS `{url.database}` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;")
+                    conn.commit()
+                    conn.close()
+            except Exception as e:
+                app.logger.warning(f"MySQL database initialization notice: {e}")
+
         try:
+            db.create_all()
             from models import User
             if not User.query.first():
                 from seed_db import seed
                 seed()
         except Exception as e:
-            app.logger.warning(f"Database auto-seed check: {e}")
+            app.logger.error(
+                f"\n⚠️  Database initialization warning: {e}\n"
+                f"   Connection URI: {app.config.get('SQLALCHEMY_DATABASE_URI')}\n"
+                f"   Ensure MySQL is running (e.g. XAMPP, MySQL Server) and your .env configuration is correct.\n"
+            )
+
 
     # Register blueprints
     from routes.auth import auth_bp

@@ -81,18 +81,48 @@ All test accounts are pre-seeded and ready to use immediately:
 
 ---
 
+## 🗄️ Database Configuration (MySQL)
+
+CleanShores uses **MySQL** as its primary persistent database engine via PyMySQL and SQLAlchemy.
+
+### Setting Up MySQL:
+1. Ensure your MySQL server is running (e.g., via **XAMPP**, **MySQL Server**, **MariaDB**, or cloud provider).
+2. Configure credentials in `.env` (or `CleanShores/.env`):
+   ```ini
+   # Option 1: Full Connection URL
+   DATABASE_URL=mysql+pymysql://root:yourpassword@localhost:3306/cleanshores_db
+
+   # Option 2: Individual variables
+   MYSQL_HOST=localhost
+   MYSQL_PORT=3306
+   MYSQL_USER=root
+   MYSQL_PASSWORD=
+   MYSQL_DATABASE=cleanshores_db
+   ```
+3. *Note*: The database `cleanshores_db` will be **automatically created** on MySQL if it does not already exist!
+
+### Migrating Existing Data from SQLite to MySQL:
+If you have existing sample data or users in the old SQLite file (`database/cleanShores.db`), you can migrate everything directly into MySQL with a single command:
+```bash
+npm run migrate:mysql
+# Or:
+python CleanShores/migrate_sqlite_to_mysql.py
+```
+
+---
+
 ## 🛠️ Local Development
 
 To run the application locally on your computer:
 
 ```bash
-# 1. Install dependencies
+# 1. Install dependencies (including pymysql and cryptography)
 pip install -r requirements.txt
 
 # 2. Start the development server
-python wsgi.py
-# Or with npm runner:
 npm run dev
+# Or directly:
+python CleanShores/app.py
 ```
 
 Visit `http://localhost:5000` in your web browser.
