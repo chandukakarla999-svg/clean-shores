@@ -4,8 +4,17 @@ from flask import Flask, render_template, redirect, url_for, session
 from config import Config
 from models import db
 
+basedir = os.path.abspath(os.path.dirname(__file__))
+static_folder_path = os.path.join(basedir, 'static')
+template_folder_path = os.path.join(basedir, 'templates')
+
 def create_app():
-    app = Flask(__name__)
+    app = Flask(
+        __name__,
+        static_folder=static_folder_path,
+        static_url_path='/static',
+        template_folder=template_folder_path
+    )
     app.config.from_object(Config)
     app.permanent_session_lifetime = timedelta(days=7)
 
@@ -146,6 +155,10 @@ def create_app():
         if session.get('role') not in ('admin',):
             return redirect(url_for('main.index'))
         return send_from_directory(app.config['VERIFICATION_UPLOAD_FOLDER'], filename)
+
+    @app.route('/CleanShores/static/<path:filename>')
+    def cleanshores_static(filename):
+        return send_from_directory(static_folder_path, filename)
 
     # Jinja2 globals
     @app.context_processor
