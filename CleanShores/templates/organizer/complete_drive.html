@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Complete Drive - {{ drive.title }}{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'organizer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Submit Impact Report</h1>
+                <p class="dashboard-page-sub">{{ drive.title }} &mdash; Mark as completed and publish the waste segregation data.</p>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <form method="POST" action="{{ url_for('organizer.complete_drive', drive_id=drive.id) }}" enctype="multipart/form-data">
+                <!-- Waste Data -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">1</div>
+                        <h3>Waste Segregation Data (kg)</h3>
+                    </div>
+                    <div class="waste-grid">
+                        <div class="waste-input-card waste-plastic">
+                            <div class="waste-icon">🟦</div>
+                            <label>Plastic</label>
+                            <input type="number" name="plastic_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                        <div class="waste-input-card waste-glass">
+                            <div class="waste-icon">🟩</div>
+                            <label>Glass</label>
+                            <input type="number" name="glass_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                        <div class="waste-input-card waste-metal">
+                            <div class="waste-icon">🟨</div>
+                            <label>Metal</label>
+                            <input type="number" name="metal_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                        <div class="waste-input-card waste-organic">
+                            <div class="waste-icon">🟫</div>
+                            <label>Organic</label>
+                            <input type="number" name="organic_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                        <div class="waste-input-card waste-hazardous">
+                            <div class="waste-icon">🔴</div>
+                            <label>Hazardous</label>
+                            <input type="number" name="hazardous_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                        <div class="waste-input-card waste-other">
+                            <div class="waste-icon">⬜</div>
+                            <label>Other</label>
+                            <input type="number" name="other_waste_kg" class="form-input" step="0.1" min="0" value="0" oninput="updateTotal()">
+                        </div>
+                    </div>
+                    <div class="total-waste-display">
+                        <div class="total-waste-label">Total Waste Collected:</div>
+                        <div class="total-waste-value" id="totalWasteDisplay">0</div>
+                        <div class="total-waste-unit">kg</div>
+                        <input type="hidden" name="total_waste_kg" id="totalWasteInput" value="0">
+                    </div>
+                </div>
+
+                <!-- Attendees & Summary -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">2</div>
+                        <h3>Attendance & Summary</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="attendees_count">Actual Attendees Count</label>
+                        <input type="number" id="attendees_count" name="attendees_count" class="form-input"
+                               min="0" value="{{ drive.registered_count }}">
+                    </div>
+                    <div class="form-group">
+                        <label for="summary">Drive Summary *</label>
+                        <textarea id="summary" name="summary" class="form-textarea" rows="5" required
+                                  placeholder="Describe the drive: what went well, environmental observations, community spirit, challenges faced, impact achieved..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Photos -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">3</div>
+                        <h3>Drive Photos</h3>
+                    </div>
+                    <div class="file-upload-zone" id="photoZone">
+                        <i class="fa-solid fa-images"></i>
+                        <p>Upload Before / After / Action photos</p>
+                        <span>Multiple files allowed — JPG, PNG, WEBP</span>
+                        <input type="file" id="photos" name="photos" accept="image/*" multiple class="file-input-hidden" onchange="previewPhotos(this)">
+                    </div>
+                    <div class="photo-preview-grid" id="photoPreviewGrid"></div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('organizer.my_drives') }}" class="btn-secondary-action">Cancel</a>
+                    <button type="submit" class="btn-primary-action btn-complete-action" onclick="return confirm('Mark this drive as completed? This cannot be undone.')">
+                        <i class="fa-solid fa-check-circle"></i> Publish Report & Complete Drive
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateTotal() {
+    const inputs = document.querySelectorAll('.waste-input-card input[type=number]');
+    let total = 0;
+    inputs.forEach(i => total += parseFloat(i.value) || 0);
+    document.getElementById('totalWasteDisplay').textContent = total.toFixed(1);
+    document.getElementById('totalWasteInput').value = total.toFixed(1);
+}
+
+function previewPhotos(input) {
+    const grid = document.getElementById('photoPreviewGrid');
+    grid.innerHTML = '';
+    Array.from(input.files).forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const div = document.createElement('div');
+            div.className = 'photo-preview-item';
+            div.innerHTML = `<img src="${e.target.result}" alt="Photo preview">`;
+            grid.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+    });
+}
+</script>
+{% endblock %}

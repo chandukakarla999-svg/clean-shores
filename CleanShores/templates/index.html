@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+{% block title %}Clean Shores - Citizen & Organizer Portals{% endblock %}
+
+{% block content %}
+<div class="home-portal-hero">
+    <!-- Ambient glowing ocean backdrop -->
+    <div class="ambient-ocean">
+        <div class="ambient-circle circ-1"></div>
+        <div class="ambient-circle circ-2"></div>
+        <div class="ambient-circle circ-3"></div>
+    </div>
+
+    <div class="home-portal-container">
+        <!-- Title and Tagline -->
+        <header class="home-hero-header">
+            <div class="hero-brand-pill">
+                <span class="pulse-indicator"></span>
+                <span>CLEAN SHORES PLATFORM</span>
+                <span class="year-pill">2026</span>
+            </div>
+            <h1 class="hero-brand-title">
+                Clean <span class="brand-highlight">Shores</span>
+            </h1>
+            <p class="hero-brand-subtitle">
+                India's Citizen-Driven Beach & Urban Cleanup Coordination Network. Choose your portal below to sign in or register:
+            </p>
+        </header>
+
+        <!-- The Two Main Choices: Volunteer and Organizer -->
+        <div class="portals-dual-grid">
+            <!-- 1. Volunteer Portal -->
+            <a href="{{ url_for('auth.volunteer_auth') }}" class="portal-entry-card card-vol" id="portalVolunteer">
+                <div class="card-glow-edge"></div>
+                <div class="card-badge-pill badge-vol">
+                    <i class="fa-solid fa-seedling"></i> Citizen & Student
+                </div>
+                <div class="card-icon-halo halo-vol">
+                    <i class="fa-solid fa-person-hiking"></i>
+                </div>
+                <div class="card-info">
+                    <h2 class="card-title">Volunteer</h2>
+                    <p class="card-desc">
+                        Join beach & urban cleanups in your city, track your volunteer hours, earn zero-waste badges, and download verified certificates.
+                    </p>
+                </div>
+                <div class="card-action-bar">
+                    <span class="btn-portal-enter btn-vol-enter">
+                        Enter Volunteer Portal <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                    <span class="card-login-hint">Sign In &middot; Create Account</span>
+                </div>
+            </a>
+
+            <!-- 2. Organizer Portal -->
+            <a href="{{ url_for('auth.organizer_auth') }}" class="portal-entry-card card-org" id="portalOrganizer">
+                <div class="card-glow-edge"></div>
+                <div class="card-badge-pill badge-org">
+                    <i class="fa-solid fa-building-columns"></i> NGO & Institution
+                </div>
+                <div class="card-icon-halo halo-org">
+                    <i class="fa-solid fa-bullhorn"></i>
+                </div>
+                <div class="card-info">
+                    <h2 class="card-title">Organizer</h2>
+                    <p class="card-desc">
+                        Organize certified cleanup events, recruit volunteers, upload organization credentials, and submit segregated waste audit reports.
+                    </p>
+                </div>
+                <div class="card-action-bar">
+                    <span class="btn-portal-enter btn-org-enter">
+                        Enter Organizer Portal <i class="fa-solid fa-arrow-right"></i>
+                    </span>
+                    <span class="card-login-hint">Sign In &middot; Register Org</span>
+                </div>
+            </a>
+        </div>
+
+        <!-- Live Impact Metric Strip -->
+        <div class="home-metrics-ribbon">
+            <div class="metric-block">
+                <i class="fa-solid fa-users"></i>
+                <div>
+                    <span class="metric-num">{{ total_users or '1,420+' }}</span>
+                    <span class="metric-label">Eco Warriors</span>
+                </div>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <i class="fa-solid fa-calendar-check"></i>
+                <div>
+                    <span class="metric-num">{{ total_drives or '84+' }}</span>
+                    <span class="metric-label">Cleanup Drives</span>
+                </div>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <i class="fa-solid fa-recycle"></i>
+                <div>
+                    <span class="metric-num">{{ total_waste or '12,850' }} kg</span>
+                    <span class="metric-label">Waste Diverted</span>
+                </div>
+            </div>
+            <div class="metric-divider"></div>
+            <div class="metric-block">
+                <i class="fa-solid fa-envelope-circle-check"></i>
+                <div>
+                    <span class="metric-num">Instant</span>
+                    <span class="metric-label">Mobile Email Alerts</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.home-portal-hero {
+    position: relative;
+    min-height: calc(100vh - 70px);
+    margin-top: 70px;
+    background: #081628;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3.5rem 1.5rem;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.ambient-ocean {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.ambient-circle {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.3;
+}
+
+.circ-1 {
+    width: 650px;
+    height: 650px;
+    background: #028090;
+    top: -150px;
+    left: -150px;
+}
+
+.circ-2 {
+    width: 700px;
+    height: 700px;
+    background: #00a896;
+    bottom: -200px;
+    right: -100px;
+}
+
+.circ-3 {
+    width: 450px;
+    height: 450px;
+    background: #134074;
+    top: 30%;
+    left: 45%;
+}
+
+.home-portal-container {
+    position: relative;
+    z-index: 2;
+    max-width: 1040px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+.home-hero-header {
+    text-align: center;
+    margin-bottom: 2.75rem;
+}
+
+.hero-brand-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    background: rgba(2, 195, 154, 0.12);
+    border: 1px solid rgba(2, 195, 154, 0.35);
+    color: #02c39a;
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    margin-bottom: 1rem;
+}
+
+.pulse-indicator {
+    width: 8px;
+    height: 8px;
+    background: #02c39a;
+    border-radius: 50%;
+    box-shadow: 0 0 10px #02c39a;
+}
+
+.year-pill {
+    background: rgba(255, 255, 255, 0.15);
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    font-size: 0.65rem;
+}
+
+.hero-brand-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 0.85rem;
+}
+
+.brand-highlight {
+    background: linear-gradient(135deg, #02c39a 0%, #00a896 50%, #028090 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    display: inline-block;
+}
+
+.hero-brand-subtitle {
+    font-size: 1.12rem;
+    color: #94a3b8;
+    max-width: 650px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Dual Portals Grid */
+.portals-dual-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2.75rem;
+}
+
+.portal-entry-card {
+    position: relative;
+    background: rgba(14, 32, 60, 0.88);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.5rem 2.25rem 2rem;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    transition: all 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+}
+
+.portal-entry-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+}
+
+.card-vol:hover {
+    border-color: #02c39a;
+    box-shadow: 0 20px 50px rgba(2, 195, 154, 0.25);
+}
+
+.card-org:hover {
+    border-color: #38bdf8;
+    box-shadow: 0 20px 50px rgba(56, 189, 248, 0.25);
+}
+
+.card-badge-pill {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    font-size: 0.72rem;
+    font-weight: 800;
+    padding: 0.3rem 0.75rem;
+    border-radius: 999px;
+    letter-spacing: 0.05em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.badge-vol {
+    background: rgba(2, 195, 154, 0.15);
+    color: #02c39a;
+    border: 1px solid rgba(2, 195, 154, 0.35);
+}
+
+.badge-org {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.35);
+}
+
+.card-icon-halo {
+    width: 68px;
+    height: 68px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.9rem;
+    margin-bottom: 1.5rem;
+    transition: transform 0.3s ease;
+}
+
+.portal-entry-card:hover .card-icon-halo {
+    transform: scale(1.08);
+}
+
+.halo-vol {
+    background: linear-gradient(135deg, rgba(2, 195, 154, 0.25), rgba(0, 168, 150, 0.35));
+    color: #02c39a;
+    border: 1.5px solid rgba(2, 195, 154, 0.4);
+}
+
+.halo-org {
+    background: linear-gradient(135deg, rgba(56, 189, 248, 0.25), rgba(2, 128, 144, 0.35));
+    color: #38bdf8;
+    border: 1.5px solid rgba(56, 189, 248, 0.4);
+}
+
+.card-title {
+    font-size: 1.9rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.6rem;
+    letter-spacing: -0.02em;
+}
+
+.card-desc {
+    font-size: 0.95rem;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    flex-grow: 1;
+}
+
+.card-action-bar {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn-portal-enter {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 700;
+    transition: gap 0.2s ease;
+}
+
+.portal-entry-card:hover .btn-portal-enter {
+    gap: 0.8rem;
+}
+
+.btn-vol-enter {
+    color: #02c39a;
+}
+
+.btn-org-enter {
+    color: #38bdf8;
+}
+
+.card-login-hint {
+    font-size: 0.78rem;
+    color: #64748b;
+}
+
+/* Impact Ribbon */
+.home-metrics-ribbon {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    background: rgba(14, 32, 60, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(14px);
+    border-radius: 18px;
+    padding: 1.25rem 2rem;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+}
+
+.metric-block {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.metric-block i {
+    font-size: 1.6rem;
+    color: #02c39a;
+}
+
+.metric-num {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+.metric-label {
+    display: block;
+    font-size: 0.75rem;
+    color: #94a3b8;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+}
+
+.metric-divider {
+    width: 1px;
+    height: 35px;
+    background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 820px) {
+    .portals-dual-grid {
+        grid-template-columns: 1fr;
+    }
+    .metric-divider {
+        display: none;
+    }
+    .hero-brand-title {
+        font-size: 2.6rem;
+    }
+}
+</style>
+{% endblock %}

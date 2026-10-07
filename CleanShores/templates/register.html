@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% block title %}Create Account{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-layout auth-layout-register">
+    <div class="auth-left auth-left-register">
+        <div class="auth-left-content">
+            <a href="{{ url_for('index') }}" class="auth-brand">
+                <span>🌊</span> CleanShores
+            </a>
+            <h2>Join the Eco Movement</h2>
+            <p>Register as a volunteer or organization and start making a real difference on our beaches and cities.</p>
+            <div class="auth-roles">
+                <div class="role-card" id="roleCardVolunteer">
+                    <div class="role-icon">🙋</div>
+                    <div class="role-name">Volunteer</div>
+                    <div class="role-desc">Join cleanup drives, earn certificates, track your impact</div>
+                </div>
+                <div class="role-card" id="roleCardOrganizer">
+                    <div class="role-icon">🏛️</div>
+                    <div class="role-name">Organizer</div>
+                    <div class="role-desc">NGO/College/Community group conducting verified drives</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="auth-right auth-right-register">
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <h1>Create Account</h1>
+                <p>Already have an account? <a href="{{ url_for('auth.login') }}">Sign in</a></p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.register') }}" class="auth-form" id="registerForm">
+                <!-- Role Selection -->
+                <div class="form-group">
+                    <label>I am registering as:</label>
+                    <div class="role-toggle">
+                        <label class="role-toggle-btn {% if form_data.get('role','volunteer')=='volunteer' %}active{% endif %}" id="roleVolunteerBtn">
+                            <input type="radio" name="role" value="volunteer" {% if form_data.get('role','volunteer')=='volunteer' %}checked{% endif %}
+                                onchange="updateRoleUI('volunteer')">
+                            <i class="fa-solid fa-person-hiking"></i> Volunteer
+                        </label>
+                        <label class="role-toggle-btn {% if form_data.get('role')=='organizer' %}active{% endif %}" id="roleOrganizerBtn">
+                            <input type="radio" name="role" value="organizer" {% if form_data.get('role')=='organizer' %}checked{% endif %}
+                                onchange="updateRoleUI('organizer')">
+                            <i class="fa-solid fa-bullhorn"></i> Organizer
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="full_name"><i class="fa-solid fa-user"></i> Full Name *</label>
+                        <input type="text" id="full_name" name="full_name" class="form-input"
+                               value="{{ form_data.get('full_name','') }}" placeholder="Your full name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="username"><i class="fa-solid fa-at"></i> Username *</label>
+                        <input type="text" id="username" name="username" class="form-input"
+                               value="{{ form_data.get('username','') }}" placeholder="unique_username" required minlength="3">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email"><i class="fa-solid fa-envelope"></i> Email Address *</label>
+                    <input type="email" id="email" name="email" class="form-input"
+                           value="{{ form_data.get('email','') }}" placeholder="your@email.com" required>
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="phone"><i class="fa-solid fa-phone"></i> Phone Number</label>
+                        <input type="tel" id="phone" name="phone" class="form-input"
+                               value="{{ form_data.get('phone','') }}" placeholder="+91 98765 43210">
+                    </div>
+                    <div class="form-group">
+                        <label for="location"><i class="fa-solid fa-location-dot"></i> City / Location</label>
+                        <input type="text" id="location" name="location" class="form-input"
+                               value="{{ form_data.get('location','') }}" placeholder="Mumbai, Maharashtra">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="college_or_org"><i class="fa-solid fa-building"></i>
+                        <span id="orgLabel">College / Organization</span>
+                    </label>
+                    <input type="text" id="college_or_org" name="college_or_org" class="form-input"
+                           value="{{ form_data.get('college_or_org','') }}"
+                           placeholder="IIT Bombay / WWF India / Self">
+                </div>
+
+                <div class="form-grid-2">
+                    <div class="form-group">
+                        <label for="password"><i class="fa-solid fa-lock"></i> Password *</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="password" name="password" class="form-input"
+                                   placeholder="Min 6 characters" required minlength="6">
+                            <button type="button" class="toggle-password" onclick="togglePwdVisibility('password')">
+                                <i class="fa-solid fa-eye" id="password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bars">
+                                <div class="strength-bar"></div>
+                                <div class="strength-bar"></div>
+                                <div class="strength-bar"></div>
+                                <div class="strength-bar"></div>
+                            </div>
+                            <span class="strength-label" id="strengthLabel">Enter password</span>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password"><i class="fa-solid fa-lock-open"></i> Confirm Password *</label>
+                        <div class="input-with-icon">
+                            <input type="password" id="confirm_password" name="confirm_password" class="form-input"
+                                   placeholder="Repeat your password" required>
+                            <button type="button" class="toggle-password" onclick="togglePwdVisibility('confirm_password')">
+                                <i class="fa-solid fa-eye" id="confirm_password-eye"></i>
+                            </button>
+                        </div>
+                        <div class="password-match-indicator" id="matchIndicator"></div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" required>
+                        I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of CleanShores
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-auth-submit" id="registerBtn">
+                    <i class="fa-solid fa-seedling"></i> Create My Account
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+function updateRoleUI(role) {
+    document.getElementById('roleVolunteerBtn').classList.toggle('active', role === 'volunteer');
+    document.getElementById('roleOrganizerBtn').classList.toggle('active', role === 'organizer');
+    document.getElementById('orgLabel').textContent = role === 'organizer' ? 'Organization Name' : 'College / Organization';
+}
+// Init on load based on form_data
+document.addEventListener('DOMContentLoaded', function() {
+    const checked = document.querySelector('input[name="role"]:checked');
+    if (checked) updateRoleUI(checked.value);
+});
+</script>
+{% endblock %}

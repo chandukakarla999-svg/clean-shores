@@ -1,0 +1,200 @@
+{% extends "base.html" %}
+{% block title %}Email Notification Inspector - CleanShores{% endblock %}
+
+{% block content %}
+<div class="inbox-wrapper">
+    <div class="inbox-container">
+        <div class="inbox-header">
+            <div>
+                <a href="{{ url_for('index') }}" class="inbox-back"><i class="fa-solid fa-arrow-left"></i> Return to Site</a>
+                <h1><i class="fa-solid fa-envelope-open-text"></i> Dispatched Mobile & Email Log</h1>
+                <p>Real-time log of welcome confirmations, login alerts, and drive certificates dispatched to users' mobile emails.</p>
+            </div>
+            <div class="inbox-stats">
+                <span class="badge-total">{{ logs|length }} Emails Dispatched</span>
+            </div>
+        </div>
+
+        {% if not logs %}
+        <div class="empty-inbox-card">
+            <i class="fa-solid fa-inbox"></i>
+            <h3>No emails logged yet in this session</h3>
+            <p>Sign up or log in as a Volunteer or Organizer to trigger mobile notification emails!</p>
+            <div class="empty-actions">
+                <a href="{{ url_for('auth.volunteer_auth') }}" class="btn-empty-act">Volunteer Portal</a>
+                <a href="{{ url_for('auth.organizer_auth') }}" class="btn-empty-act">Organizer Portal</a>
+            </div>
+        </div>
+        {% else %}
+        <div class="email-cards-list">
+            {% for item in logs %}
+            <div class="email-log-item">
+                <div class="email-item-header">
+                    <div class="email-subject-line">
+                        <span class="email-status-pill status-{{ item.status.split()[0].lower() }}">{{ item.status }}</span>
+                        <strong>{{ item.subject }}</strong>
+                    </div>
+                    <div class="email-meta-time">
+                        <i class="fa-solid fa-clock"></i> {{ item.timestamp }}
+                    </div>
+                </div>
+                <div class="email-item-to">
+                    <span><strong>To:</strong> {{ item.to }}</span>
+                </div>
+                <div class="email-rendered-preview">
+                    {{ item.html|safe }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.inbox-wrapper {
+    min-height: calc(100vh - 70px);
+    margin-top: 70px;
+    background: #0f172a;
+    color: #f1f5f9;
+    padding: 2.5rem 1.5rem;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+.inbox-container {
+    max-width: 900px;
+    margin: 0 auto;
+}
+.inbox-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+    padding-bottom: 1.25rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+.inbox-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: #38bdf8;
+    text-decoration: none;
+    font-size: 0.88rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.inbox-header h1 {
+    font-size: 1.85rem;
+    color: #ffffff;
+    margin: 0.2rem 0;
+}
+.inbox-header p {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin: 0;
+}
+.badge-total {
+    background: rgba(2, 195, 154, 0.2);
+    color: #02c39a;
+    border: 1px solid rgba(2, 195, 154, 0.4);
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+.empty-inbox-card {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px dashed rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 4rem 2rem;
+}
+.empty-inbox-card i {
+    font-size: 3rem;
+    color: #64748b;
+    margin-bottom: 1rem;
+}
+.empty-inbox-card h3 {
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+}
+.empty-inbox-card p {
+    color: #94a3b8;
+    margin-bottom: 1.5rem;
+}
+.empty-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+}
+.btn-empty-act {
+    background: #028090;
+    color: #ffffff;
+    padding: 0.65rem 1.4rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.email-cards-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+.email-log-item {
+    background: #1e293b;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+.email-item-header {
+    background: rgba(0, 0, 0, 0.25);
+    padding: 1rem 1.25rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.email-subject-line {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    color: #ffffff;
+    font-size: 1rem;
+}
+.email-status-pill {
+    padding: 0.2rem 0.6rem;
+    border-radius: 6px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+}
+.status-sent, .status-delivered {
+    background: #065f46;
+    color: #6ee7b7;
+}
+.status-simulated {
+    background: #1e3a5f;
+    color: #38bdf8;
+}
+.email-meta-time {
+    font-size: 0.8rem;
+    color: #94a3b8;
+}
+.email-item-to {
+    padding: 0.75rem 1.25rem;
+    background: rgba(255, 255, 255, 0.02);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    font-size: 0.85rem;
+    color: #cbd5e1;
+}
+.email-rendered-preview {
+    padding: 1.5rem;
+    background: #ffffff;
+    color: #1e293b;
+}
+</style>
+{% endblock %}

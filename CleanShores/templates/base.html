@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}CleanShores – Citizen-Driven Beach & Urban Cleanup Coordination Platform. Join or organize eco cleanup drives in your city.{% endblock %}">
+    <title>{% block title %}CleanShores{% endblock %} | CleanShores Platform</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌊</text></svg>">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <!-- Main CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/responsive.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+
+<!-- Navigation -->
+<nav class="cs-nav" id="mainNav">
+    <div class="nav-container">
+        <a href="{{ url_for('index') }}" class="nav-brand">
+            <span class="brand-icon">🌊</span>
+            <span class="brand-text">Clean<span class="brand-accent">Shores</span></span>
+        </a>
+
+        <div class="nav-links" id="navLinks">
+            <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
+                <i class="fa-solid fa-house"></i> Home
+            </a>
+            <a href="{{ url_for('drives.browse_drives') }}" class="nav-link {% if 'browse' in (request.endpoint or '') %}active{% endif %}">
+                <i class="fa-solid fa-compass"></i> Browse Drives
+            </a>
+            <a href="{{ url_for('drives.completed_drives') }}" class="nav-link">
+                <i class="fa-solid fa-trophy"></i> Impact
+            </a>
+            <a href="{{ url_for('about') }}" class="nav-link {% if request.endpoint == 'about' %}active{% endif %}">
+                <i class="fa-solid fa-circle-info"></i> About
+            </a>
+
+            {% if current_user %}
+                <!-- Notification Bell -->
+                <div class="nav-notification" id="notifDropdown">
+                    <button class="notif-btn" onclick="toggleNotifDropdown()">
+                        <i class="fa-solid fa-bell"></i>
+                        {% if unread_notifications > 0 %}
+                        <span class="notif-badge">{{ unread_notifications }}</span>
+                        {% endif %}
+                    </button>
+                    <div class="notif-panel" id="notifPanel" style="display:none;">
+                        <div class="notif-panel-header">
+                            <span>Notifications</span>
+                            {% if unread_notifications > 0 %}
+                            <span class="notif-count-tag">{{ unread_notifications }} new</span>
+                            {% endif %}
+                        </div>
+                        <div class="notif-panel-body" id="notifList">
+                            <div class="notif-loading"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Messages -->
+                {% if current_user.role == 'organizer' %}
+                <a href="{{ url_for('organizer.messages') }}" class="nav-link nav-icon-link">
+                    <i class="fa-solid fa-envelope"></i>
+                    {% if unread_messages > 0 %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}
+                </a>
+                {% elif current_user.role == 'volunteer' %}
+                <a href="{{ url_for('volunteer.messages') }}" class="nav-link nav-icon-link">
+                    <i class="fa-solid fa-envelope"></i>
+                    {% if unread_messages > 0 %}<span class="notif-badge">{{ unread_messages }}</span>{% endif %}
+                </a>
+                {% endif %}
+
+                <!-- User Menu -->
+                <div class="nav-user-menu" id="userMenu">
+                    <button class="user-btn" onclick="toggleUserMenu()">
+                        <div class="user-avatar">{{ current_user.full_name[0].upper() }}</div>
+                        <span class="user-name-short">{{ current_user.full_name.split()[0] }}</span>
+                        <i class="fa-solid fa-chevron-down"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown" style="display:none;">
+                        <div class="user-dropdown-header">
+                            <div class="user-avatar-lg">{{ current_user.full_name[0].upper() }}</div>
+                            <div>
+                                <div class="user-dropdown-name">{{ current_user.full_name }}</div>
+                                <div class="user-dropdown-role role-{{ current_user.role }}">
+                                    {{ current_user.role.capitalize() }}
+                                    {% if current_user.is_verified %}<i class="fa-solid fa-circle-check verified-icon"></i>{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="user-dropdown-links">
+                            <a href="{{ url_for('dashboard') }}"><i class="fa-solid fa-gauge"></i> Dashboard</a>
+                            {% if current_user.role == 'volunteer' %}
+                            <a href="{{ url_for('volunteer.profile') }}"><i class="fa-solid fa-user-pen"></i> Edit Profile</a>
+                            <a href="{{ url_for('volunteer.my_registrations') }}"><i class="fa-solid fa-calendar-check"></i> My Drives</a>
+                            {% elif current_user.role == 'organizer' %}
+                            <a href="{{ url_for('organizer.my_drives') }}"><i class="fa-solid fa-list-check"></i> My Drives</a>
+                            <a href="{{ url_for('organizer.verification') }}"><i class="fa-solid fa-shield-halved"></i> Verification</a>
+                            {% elif current_user.role == 'admin' %}
+                            <a href="{{ url_for('admin.organizers') }}"><i class="fa-solid fa-user-shield"></i> Manage Verifications</a>
+                            {% endif %}
+                            <hr class="dropdown-divider">
+                            <a href="{{ url_for('auth.logout') }}" class="logout-link"><i class="fa-solid fa-right-from-bracket"></i> Log Out</a>
+                        </div>
+                    </div>
+                </div>
+            {% else %}
+                <a href="{{ url_for('auth.email_inbox') }}" class="nav-link" title="Inspect emails sent to users">
+                    <i class="fa-solid fa-envelope-open-text"></i> Email Logs
+                </a>
+                <a href="{{ url_for('auth.volunteer_auth') }}" class="btn-nav-outline">
+                    <i class="fa-solid fa-person-hiking"></i> Volunteer
+                </a>
+                <a href="{{ url_for('auth.organizer_auth') }}" class="btn-nav-solid">
+                    <i class="fa-solid fa-bullhorn"></i> Organizer
+                </a>
+            {% endif %}
+        </div>
+
+        <button class="nav-hamburger" id="navToggle" onclick="toggleMobileNav()" aria-label="Toggle navigation">
+            <span></span><span></span><span></span>
+        </button>
+    </div>
+</nav>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+<div class="flash-container" id="flashContainer">
+    {% for category, message in messages %}
+    <div class="flash-alert flash-{{ category }}" role="alert">
+        <i class="fa-solid {% if category == 'success' %}fa-circle-check{% elif category == 'danger' %}fa-circle-xmark{% elif category == 'warning' %}fa-triangle-exclamation{% else %}fa-circle-info{% endif %}"></i>
+        <span>{{ message }}</span>
+        <button onclick="this.parentElement.remove()" class="flash-close">&times;</button>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- Main Content -->
+<main>
+    {% block content %}{% endblock %}
+</main>
+
+<!-- Footer -->
+<footer class="cs-footer">
+    <div class="footer-container">
+        <div class="footer-brand">
+            <div class="footer-logo">🌊 CleanShores</div>
+            <p>Citizen-Driven Beach & Urban Cleanup Coordination Platform. Together, we make waves of positive change.</p>
+            <div class="footer-social">
+                <a href="#" title="Twitter"><i class="fa-brands fa-twitter"></i></a>
+                <a href="#" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                <a href="#" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                <a href="#" title="YouTube"><i class="fa-brands fa-youtube"></i></a>
+            </div>
+        </div>
+        <div class="footer-links">
+            <div class="footer-col">
+                <h4>Platform</h4>
+                <ul>
+                    <li><a href="{{ url_for('drives.browse_drives') }}">Browse Drives</a></li>
+                    <li><a href="{{ url_for('drives.completed_drives') }}">Completed Drives</a></li>
+                    <li><a href="{{ url_for('about') }}">About Us</a></li>
+                    {% if not current_user %}
+                    <li><a href="{{ url_for('auth.register') }}">Join as Volunteer</a></li>
+                    <li><a href="{{ url_for('auth.register') }}">Register as Organizer</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Our Mission</h4>
+                <ul>
+                    <li><a href="#">Waste Segregation</a></li>
+                    <li><a href="#">Zero Plastic</a></li>
+                    <li><a href="#">Marine Conservation</a></li>
+                    <li><a href="#">Community Impact</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h4>Quick Stats</h4>
+                <div class="footer-stats">
+                    <div class="footer-stat">🌊 Ocean-First Initiative</div>
+                    <div class="footer-stat">♻️ Zero-Waste Segregation</div>
+                    <div class="footer-stat">🏅 Certified Participation</div>
+                    <div class="footer-stat">🌱 Environmental Impact Reports</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <p>&copy; 2026 CleanShores Platform. Built for the environment. Every piece of waste segregated brings us closer to cleaner shores.</p>
+    </div>
+</footer>
+
+<!-- Main JS -->
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script src="{{ url_for('static', filename='js/notifications.js') }}"></script>
+{% block extra_js %}{% endblock %}
+
+<script>
+function toggleMobileNav() {
+    const navLinks = document.getElementById('navLinks');
+    const hamburger = document.getElementById('navToggle');
+    navLinks.classList.toggle('open');
+    hamburger.classList.toggle('active');
+}
+
+function toggleUserMenu() {
+    const dd = document.getElementById('userDropdown');
+    dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+    document.getElementById('notifPanel').style.display = 'none';
+}
+
+function toggleNotifDropdown() {
+    const panel = document.getElementById('notifPanel');
+    const isVisible = panel.style.display !== 'none';
+    panel.style.display = isVisible ? 'none' : 'block';
+    document.getElementById('userDropdown') && (document.getElementById('userDropdown').style.display = 'none');
+    if (!isVisible) loadNotifications();
+}
+
+document.addEventListener('click', function(e) {
+    const userMenu = document.getElementById('userMenu');
+    const notifDropdown = document.getElementById('notifDropdown');
+    if (userMenu && !userMenu.contains(e.target)) {
+        const dd = document.getElementById('userDropdown');
+        if (dd) dd.style.display = 'none';
+    }
+    if (notifDropdown && !notifDropdown.contains(e.target)) {
+        const panel = document.getElementById('notifPanel');
+        if (panel) panel.style.display = 'none';
+    }
+});
+
+// Auto-dismiss flash messages
+setTimeout(() => {
+    const flashes = document.querySelectorAll('.flash-alert');
+    flashes.forEach(f => f.style.animation = 'slideOutRight 0.5s forwards');
+    setTimeout(() => flashes.forEach(f => f.remove()), 500);
+}, 5000);
+
+// Navbar scroll effect
+window.addEventListener('scroll', () => {
+    const nav = document.getElementById('mainNav');
+    if (window.scrollY > 60) nav.classList.add('scrolled');
+    else nav.classList.remove('scrolled');
+});
+</script>
+</body>
+</html>

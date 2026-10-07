@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% block title %}Volunteer Dashboard{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'volunteer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">My Dashboard</h1>
+                <p class="dashboard-page-sub">Welcome, <strong>{{ user.full_name }}</strong>! Your eco-impact at a glance.</p>
+            </div>
+            <a href="{{ url_for('drives.browse_drives') }}" class="btn-topbar-action">
+                <i class="fa-solid fa-compass"></i> Browse Drives
+            </a>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card stat-card-blue">
+                <div class="stat-card-icon"><i class="fa-solid fa-calendar-check"></i></div>
+                <div class="stat-card-value">{{ total_registered }}</div>
+                <div class="stat-card-label">Drives Joined</div>
+            </div>
+            <div class="stat-card stat-card-teal">
+                <div class="stat-card-icon"><i class="fa-solid fa-clock"></i></div>
+                <div class="stat-card-value">{{ user.total_volunteer_hours }}</div>
+                <div class="stat-card-label">Volunteer Hours</div>
+            </div>
+            <div class="stat-card stat-card-green">
+                <div class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-card-value">{{ total_attended }}</div>
+                <div class="stat-card-label">Drives Attended</div>
+            </div>
+            <div class="stat-card stat-card-orange">
+                <div class="stat-card-icon"><i class="fa-solid fa-award"></i></div>
+                <div class="stat-card-value">{{ user.badges|length }}</div>
+                <div class="stat-card-label">Badges Earned</div>
+            </div>
+        </div>
+
+        <!-- Badges -->
+        {% if user.badges %}
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>🏅 Your Badges</h2>
+            </div>
+            <div class="badges-grid">
+                {% for badge in user.badges %}
+                <div class="badge-card">
+                    <div class="badge-icon" style="color: {{ badge.color }}">
+                        <i class="{{ badge.icon }}"></i>
+                    </div>
+                    <div class="badge-name">{{ badge.name }}</div>
+                    <div class="badge-desc">{{ badge.desc }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- My Registrations -->
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>My Recent Drives</h2>
+                <a href="{{ url_for('volunteer.my_registrations') }}" class="section-see-all">See all <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            {% if participations %}
+            <div class="drives-table-wrap">
+                <table class="cs-table">
+                    <thead>
+                        <tr><th>Drive</th><th>Location</th><th>Date</th><th>My Status</th><th>Certificate</th><th>Action</th></tr>
+                    </thead>
+                    <tbody>
+                        {% for p in participations %}
+                        <tr>
+                            <td><a href="{{ url_for('drives.drive_detail', drive_id=p.drive.id) }}" class="table-link">{{ p.drive.title }}</a></td>
+                            <td>{{ p.drive.city }}</td>
+                            <td>{{ p.drive.start_datetime.strftime('%b %d, %Y') }}</td>
+                            <td><span class="status-badge status-{{ p.status }}">{{ p.status.title() }}</span></td>
+                            <td>
+                                {% if p.certificate_id %}
+                                <span class="cert-badge"><i class="fa-solid fa-award"></i> {{ p.certificate_id }}</span>
+                                {% else %}—{% endif %}
+                            </td>
+                            <td><a href="{{ url_for('drives.drive_detail', drive_id=p.drive.id) }}" class="btn-table"><i class="fa-solid fa-eye"></i></a></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state-small">
+                <i class="fa-solid fa-compass"></i>
+                <p>You haven't joined any drives yet. <a href="{{ url_for('drives.browse_drives') }}">Browse upcoming drives</a>.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Discover Drives -->
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>🌊 Upcoming Drives Near You</h2>
+                <a href="{{ url_for('drives.browse_drives') }}" class="section-see-all">View all</a>
+            </div>
+            <div class="drives-grid drives-grid-compact">
+                {% for drive in recent_drives %}
+                <div class="drive-card drive-card-compact">
+                    <div class="drive-card-banner" style="background:linear-gradient(135deg, #0B2545, #028090); height:80px;">
+                        <div class="drive-banner-icon" style="font-size:1.5rem;">{{ {'Beach Cleanup':'🏖️','Urban Cleanup':'🏙️','River Cleanup':'🌊','Park Cleanup':'🌳'}.get(drive.category,'🌿') }}</div>
+                        <div class="drive-category-tag">{{ drive.category }}</div>
+                    </div>
+                    <div class="drive-card-body">
+                        <h3 class="drive-title" style="font-size:0.95rem;">{{ drive.title }}</h3>
+                        <div class="drive-meta">
+                            <span><i class="fa-solid fa-location-dot"></i> {{ drive.city }}</span>
+                            <span><i class="fa-regular fa-calendar"></i> {{ drive.start_datetime.strftime('%b %d') }}</span>
+                        </div>
+                        <div class="drive-card-footer" style="margin-top:0.75rem;">
+                            <a href="{{ url_for('drives.drive_detail', drive_id=drive.id) }}" class="btn-drive-detail" style="font-size:0.8rem; padding:0.4rem 0.8rem;">View & Register</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Notifications -->
+        {% if recent_notifications %}
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>Recent Notifications</h2>
+                <a href="{{ url_for('volunteer.notifications') }}" class="section-see-all">See all</a>
+            </div>
+            <div class="notif-list">
+                {% for n in recent_notifications %}
+                <div class="notif-item notif-item-{{ n.notification_type }}">
+                    <div class="notif-item-icon"><i class="fa-solid {{ {'registration':'fa-user-plus','drive_update':'fa-calendar','certificate':'fa-award','message':'fa-envelope'}.get(n.notification_type,'fa-bell') }}"></i></div>
+                    <div class="notif-item-body"><strong>{{ n.title }}</strong><p>{{ n.message }}</p></div>
+                    <div class="notif-item-time">{{ n.created_at | timesince }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

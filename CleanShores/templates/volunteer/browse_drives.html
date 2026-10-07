@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Browse Cleanup Drives{% endblock %}
+
+{% block content %}
+<div class="browse-layout">
+    <!-- Filters Header -->
+    <div class="browse-header">
+        <div class="section-container">
+            <h1 class="browse-title">Discover Cleanup Drives</h1>
+            <p class="browse-subtitle">Find verified environmental cleanup events near you and register as a volunteer.</p>
+
+            <form method="GET" action="{{ url_for('drives.browse_drives') }}" class="browse-filters" id="filterForm">
+                <div class="filter-row">
+                    <div class="filter-search">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                        <input type="text" name="q" value="{{ search_query }}" placeholder="Search by name, location, or description..." class="filter-input-search">
+                    </div>
+                    <select name="category" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if current_category==cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="city" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">All Cities</option>
+                        {% for city in cities %}
+                        <option value="{{ city }}" {% if current_city==city %}selected{% endif %}>{{ city }}</option>
+                        {% endfor %}
+                    </select>
+                    <select name="status" class="filter-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="upcoming" {% if current_status=='upcoming' %}selected{% endif %}>Upcoming</option>
+                        <option value="completed" {% if current_status=='completed' %}selected{% endif %}>Completed</option>
+                        <option value="" {% if not current_status %}selected{% endif %}>All Status</option>
+                    </select>
+                    <button type="submit" class="btn-filter-search">Search</button>
+                    {% if search_query or current_category or current_city %}
+                    <a href="{{ url_for('drives.browse_drives') }}" class="btn-filter-clear">Clear</a>
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="section-container browse-container">
+        {% if drives.items %}
+        <div class="browse-results-info">
+            Showing <strong>{{ drives.total }}</strong> drives
+            {% if search_query %} for "<em>{{ search_query }}</em>"{% endif %}
+        </div>
+        <div class="drives-grid" id="drivesGrid">
+            {% for drive in drives.items %}
+            <div class="drive-card" data-category="{{ drive.category }}">
+                <div class="drive-card-banner" style="background:linear-gradient(135deg, {{ ['#0B2545','#028090','#00A896','#02C39A','#134074']|random }}, {{ ['#00A896','#02C39A','#028090','#F4A261']|random }});">
+                    {% if drive.banner_image %}
+                    <img src="{{ url_for('uploaded_drive_photo', filename=drive.banner_image) }}" class="drive-banner-img" alt="{{ drive.title }}">
+                    {% else %}
+                    <div class="drive-banner-icon">{{ {'Beach Cleanup':'🏖️','Urban Cleanup':'🏙️','River Cleanup':'🌊','Park Cleanup':'🌳','Waste Segregation Drive':'♻️','Awareness Campaign':'📢'}.get(drive.category,'🌿') }}</div>
+                    {% endif %}
+                    <div class="drive-category-tag">{{ drive.category }}</div>
+                    {% if drive.organizer.is_verified %}
+                    <div class="drive-verified-badge"><i class="fa-solid fa-circle-check"></i> Verified</div>
+                    {% endif %}
+                    {% if drive.is_full %}<div class="drive-full-overlay">FULL</div>{% endif %}
+                </div>
+                <div class="drive-card-body">
+                    <h3 class="drive-title">{{ drive.title }}</h3>
+                    <div class="drive-meta">
+                        <span><i class="fa-solid fa-location-dot"></i> {{ drive.location_name }}, {{ drive.city }}</span>
+                        <span><i class="fa-regular fa-calendar"></i> {{ drive.start_datetime.strftime('%b %d, %Y') }}</span>
+                        <span><i class="fa-solid fa-clock"></i> {{ drive.start_datetime.strftime('%I:%M %p') }}</span>
+                    </div>
+                    <p class="drive-desc">{{ drive.description[:110] }}{% if drive.description|length > 110 %}…{% endif %}</p>
+                    <div class="drive-organizer-info">
+                        <div class="organizer-avatar">{{ drive.organizer.full_name[0].upper() }}</div>
+                        <span>By <strong>{{ drive.organizer.full_name }}</strong>
+                        {% if drive.organizer.is_verified %}<i class="fa-solid fa-circle-check" style="color:#02C39A;font-size:0.7rem;"></i>{% endif %}
+                        </span>
+                    </div>
+                    <div class="drive-progress">
+                        <div class="drive-progress-info">
+                            <span>{{ drive.registered_count }} / {{ drive.max_volunteers }} volunteers</span>
+                            <span class="{% if drive.is_full %}text-danger{% endif %}">{{ drive.fill_percentage }}%</span>
+                        </div>
+                        <div class="drive-progress-bar">
+                            <div class="drive-progress-fill {% if drive.fill_percentage >= 90 %}fill-red{% elif drive.fill_percentage >= 70 %}fill-orange{% endif %}" style="width:{{ drive.fill_percentage }}%"></div>
+                        </div>
+                    </div>
+                    <div class="drive-card-footer">
+                        <a href="{{ url_for('drives.drive_detail', drive_id=drive.id) }}" class="btn-drive-detail">Details <i class="fa-solid fa-arrow-right"></i></a>
+                        {% if current_user and current_user.role == 'volunteer' %}
+                            {% if drive.id in user_registered_ids %}
+                            <span class="btn-drive-registered"><i class="fa-solid fa-check"></i> Registered</span>
+                            {% elif drive.is_full %}
+                            <span class="btn-drive-full">Full</span>
+                            {% elif drive.status == 'upcoming' %}
+                            <form method="POST" action="{{ url_for('drives.register_for_drive', drive_id=drive.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-drive-register">Register</button>
+                            </form>
+                            {% endif %}
+                        {% elif not current_user %}
+                        <a href="{{ url_for('auth.login') }}" class="btn-drive-register">Login to Register</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- Pagination -->
+        {% if drives.pages > 1 %}
+        <div class="pagination-wrap">
+            {% if drives.has_prev %}
+            <a href="{{ url_for('drives.browse_drives', page=drives.prev_num, q=search_query, category=current_category, city=current_city, status=current_status) }}" class="page-btn">← Prev</a>
+            {% endif %}
+            {% for p in drives.iter_pages() %}
+                {% if p %}
+                <a href="{{ url_for('drives.browse_drives', page=p, q=search_query, category=current_category, city=current_city, status=current_status) }}" class="page-btn {% if p == drives.page %}page-active{% endif %}">{{ p }}</a>
+                {% else %}
+                <span class="page-ellipsis">…</span>
+                {% endif %}
+            {% endfor %}
+            {% if drives.has_next %}
+            <a href="{{ url_for('drives.browse_drives', page=drives.next_num, q=search_query, category=current_category, city=current_city, status=current_status) }}" class="page-btn">Next →</a>
+            {% endif %}
+        </div>
+        {% endif %}
+
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🌊</div>
+            <h3>No drives found</h3>
+            <p>Try adjusting your filters or check back soon for upcoming drives!</p>
+            <a href="{{ url_for('drives.browse_drives') }}" class="btn-hero-primary" style="display:inline-flex;margin-top:1rem;">Clear Filters</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/drives.js') }}"></script>
+{% endblock %}

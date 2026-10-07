@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+{% block title %}Login{% endblock %}
+
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-layout">
+    <div class="auth-left">
+        <div class="auth-left-content">
+            <a href="{{ url_for('index') }}" class="auth-brand">
+                <span>🌊</span> CleanShores
+            </a>
+            <h2>Welcome Back, Eco Warrior!</h2>
+            <p>Log in to access your dashboard, discover cleanup drives, and track your environmental impact.</p>
+            <div class="auth-features">
+                <div class="auth-feature"><i class="fa-solid fa-circle-check"></i> Manage cleanup drives in your city</div>
+                <div class="auth-feature"><i class="fa-solid fa-circle-check"></i> Track your volunteer hours & certificates</div>
+                <div class="auth-feature"><i class="fa-solid fa-circle-check"></i> Connect with verified eco-organizers</div>
+                <div class="auth-feature"><i class="fa-solid fa-circle-check"></i> See your real-world environmental impact</div>
+            </div>
+            <div class="auth-wave-deco">🌊🌿🐢</div>
+        </div>
+    </div>
+
+    <div class="auth-right">
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <h1>Sign In</h1>
+                <p>Don't have an account? <a href="{{ url_for('auth.register') }}">Register here</a></p>
+            </div>
+
+            <form method="POST" action="{{ url_for('auth.login') }}" class="auth-form" id="loginForm">
+                <div class="form-group">
+                    <label for="identifier"><i class="fa-solid fa-at"></i> Email or Username</label>
+                    <input type="text" id="identifier" name="identifier" class="form-input"
+                           placeholder="Enter your email or username" required autocomplete="username">
+                </div>
+
+                <div class="form-group">
+                    <label for="password"><i class="fa-solid fa-lock"></i> Password</label>
+                    <div class="input-with-icon">
+                        <input type="password" id="password" name="password" class="form-input"
+                               placeholder="Enter your password" required autocomplete="current-password">
+                        <button type="button" class="toggle-password" onclick="togglePwdVisibility('password')">
+                            <i class="fa-solid fa-eye" id="password-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="form-row-check">
+                    <label class="checkbox-label">
+                        <input type="checkbox" name="remember_me"> Remember me for 7 days
+                    </label>
+                    <a href="{{ url_for('auth.forgot_password') }}" class="forgot-link">Forgot password?</a>
+                </div>
+
+                <button type="submit" class="btn-auth-submit" id="loginBtn">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+            </form>
+
+            <div class="auth-divider"><span>or</span></div>
+
+            <div class="auth-alt-action">
+                <p>New to CleanShores?</p>
+                <a href="{{ url_for('auth.register') }}" class="btn-auth-alt">
+                    <i class="fa-solid fa-user-plus"></i> Create Your Account
+                </a>
+            </div>
+
+            <div class="auth-demo-accounts">
+                <p class="demo-title"><i class="fa-solid fa-flask"></i> Demo Accounts (Dev Mode)</p>
+                <div class="demo-cards">
+                    <div class="demo-card" onclick="fillLogin('volunteer@cleanshores.org','Demo@2026!')">
+                        <i class="fa-solid fa-person-hiking"></i>
+                        <span>Volunteer Demo</span>
+                    </div>
+                    <div class="demo-card" onclick="fillLogin('organizer@cleanshores.org','Demo@2026!')">
+                        <i class="fa-solid fa-bullhorn"></i>
+                        <span>Organizer Demo</span>
+                    </div>
+                    <div class="demo-card" onclick="fillLogin('admin','Admin@2026!')">
+                        <i class="fa-solid fa-shield-halved"></i>
+                        <span>Admin Demo</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+<script>
+function fillLogin(id, pass) {
+    document.getElementById('identifier').value = id;
+    document.getElementById('password').value = pass;
+}
+</script>
+{% endblock %}

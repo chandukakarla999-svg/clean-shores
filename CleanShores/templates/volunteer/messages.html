@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'volunteer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar"><h1 class="dashboard-page-title">Messages</h1></div>
+        <div class="messages-layout">
+            <div class="msg-sidebar">
+                <div class="msg-sidebar-header">Conversations</div>
+                {% for u in conversation_users %}
+                <a href="{{ url_for('volunteer.messages', **{'with': u.id}) }}" class="msg-conversation {% if selected_user and selected_user.id == u.id %}active{% endif %}">
+                    <div class="msg-conv-avatar">{{ u.full_name[0].upper() }}</div>
+                    <div class="msg-conv-info"><strong>{{ u.full_name }}</strong><small>{{ u.role.capitalize() }}</small></div>
+                </a>
+                {% endfor %}
+                <div class="msg-sidebar-header" style="margin-top:1rem;">Organizers of My Drives</div>
+                {% for u in my_organizers %}
+                <a href="{{ url_for('volunteer.messages', **{'with': u.id}) }}" class="msg-conversation {% if selected_user and selected_user.id == u.id %}active{% endif %}">
+                    <div class="msg-conv-avatar">{{ u.full_name[0].upper() }}</div>
+                    <div class="msg-conv-info"><strong>{{ u.full_name }}</strong><small>Organizer</small></div>
+                </a>
+                {% endfor %}
+                {% if not conversation_users and not my_organizers %}
+                <p class="msg-empty-sidebar">Register for a drive to message its organizer.</p>
+                {% endif %}
+            </div>
+            <div class="msg-thread">
+                {% if selected_user %}
+                <div class="msg-thread-header">
+                    <div class="msg-conv-avatar">{{ selected_user.full_name[0].upper() }}</div>
+                    <div><strong>{{ selected_user.full_name }}</strong><small>{{ selected_user.role.capitalize() }}</small></div>
+                </div>
+                <div class="msg-thread-body" id="msgThreadBody">
+                    {% for m in thread_messages %}
+                    <div class="msg-bubble {% if m.sender_id == current_user.id %}msg-bubble-sent{% else %}msg-bubble-recv{% endif %}">
+                        <div class="msg-bubble-text">{{ m.message_text }}</div>
+                        <div class="msg-bubble-time">{{ m.created_at.strftime('%b %d, %I:%M %p') }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <form method="POST" action="{{ url_for('volunteer.messages') }}" class="msg-compose">
+                    <input type="hidden" name="recipient_id" value="{{ selected_user.id }}">
+                    <textarea name="message_text" class="msg-input" placeholder="Type a message..." rows="2" required></textarea>
+                    <button type="submit" class="msg-send-btn"><i class="fa-solid fa-paper-plane"></i></button>
+                </form>
+                {% else %}
+                <div class="msg-empty-state">
+                    <i class="fa-solid fa-envelope-open-text" style="font-size:3rem;color:var(--gray-300);"></i>
+                    <p>Select a conversation to start messaging</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script>const body = document.getElementById('msgThreadBody'); if(body) body.scrollTop = body.scrollHeight;</script>
+{% endblock %}

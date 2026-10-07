@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block title %}Organizer Verifications - Admin{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand"><a href="{{ url_for('index') }}">🌊 CleanShores</a></div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+            <a href="{{ url_for('admin.organizers') }}" class="sidebar-link active"><i class="fa-solid fa-shield-halved"></i> <span>Verifications</span></a>
+            <a href="{{ url_for('admin.drives') }}" class="sidebar-link"><i class="fa-solid fa-calendar-days"></i> <span>All Drives</span></a>
+            <a href="{{ url_for('admin.users') }}" class="sidebar-link"><i class="fa-solid fa-users"></i> <span>Users</span></a>
+            <div class="sidebar-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></a>
+        </nav>
+    </aside>
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div><h1 class="dashboard-page-title">Organizer Verifications</h1></div>
+        </div>
+        <div class="filter-tabs">
+            <a href="{{ url_for('admin.organizers', status='pending') }}" class="filter-tab {% if status_filter=='pending' %}active{% endif %}">Pending</a>
+            <a href="{{ url_for('admin.organizers', status='verified') }}" class="filter-tab {% if status_filter=='verified' %}active{% endif %}">Verified</a>
+            <a href="{{ url_for('admin.organizers', status='rejected') }}" class="filter-tab {% if status_filter=='rejected' %}active{% endif %}">Rejected</a>
+            <a href="{{ url_for('admin.organizers') }}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+        </div>
+        {% if verifications %}
+        <div class="verif-admin-list">
+            {% for v in verifications %}
+            <div class="verif-admin-card verif-status-{{ v.status }}">
+                <div class="verif-card-header">
+                    <div>
+                        <h3>{{ v.org_name }}</h3>
+                        <span class="tag tag-org-type">{{ v.org_type }}</span>
+                        <span class="status-badge status-{% if v.status=='verified' %}completed{% elif v.status=='pending' %}upcoming{% else %}cancelled{% endif %}">{{ v.status.capitalize() }}</span>
+                    </div>
+                    <div class="verif-submitted">Submitted: {{ v.submitted_at.strftime('%b %d, %Y') }}</div>
+                </div>
+                <div class="verif-card-body">
+                    <div class="info-grid">
+                        <div><strong>Organizer:</strong> {{ v.user.full_name }}</div>
+                        <div><strong>Email:</strong> {{ v.user.email }}</div>
+                        <div><strong>Reg No:</strong> {{ v.reg_number or 'N/A' }}</div>
+                        <div><strong>Contact:</strong> {{ v.contact_person }}</div>
+                        <div><strong>Phone:</strong> {{ v.contact_phone or 'N/A' }}</div>
+                        <div><strong>Website:</strong> {% if v.website %}<a href="{{ v.website }}" target="_blank">{{ v.website[:40] }}</a>{% else %}N/A{% endif %}</div>
+                    </div>
+                    {% if v.address %}
+                    <p style="margin-top:0.5rem; font-size:0.85rem; color:#555;"><strong>Address:</strong> {{ v.address }}</p>
+                    {% endif %}
+                    {% if v.admin_remarks %}
+                    <p style="margin-top:0.5rem; padding:0.5rem; background:#fff3cd; border-radius:6px; font-size:0.85rem;"><strong>Previous Remarks:</strong> {{ v.admin_remarks }}</p>
+                    {% endif %}
+                </div>
+                {% if v.status == 'pending' %}
+                <div class="verif-card-actions">
+                    <form method="POST" action="{{ url_for('admin.review_organizer', verification_id=v.id) }}" class="verif-review-form">
+                        <input type="hidden" name="status" value="verified">
+                        <textarea name="remarks" class="form-textarea" rows="2" placeholder="Optional remarks for approval..." style="margin-bottom:0.5rem;"></textarea>
+                        <button type="submit" class="btn-verif-approve" onclick="return confirm('Approve this organizer?')">
+                            <i class="fa-solid fa-circle-check"></i> Approve & Verify
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url_for('admin.review_organizer', verification_id=v.id) }}" class="verif-review-form">
+                        <input type="hidden" name="status" value="rejected">
+                        <textarea name="remarks" class="form-textarea" rows="2" placeholder="Reason for rejection (required)..." style="margin-bottom:0.5rem;"></textarea>
+                        <button type="submit" class="btn-verif-reject" onclick="return confirm('Reject this verification?')">
+                            <i class="fa-solid fa-circle-xmark"></i> Reject
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state"><div class="empty-icon">✅</div><h3>No verifications {{ 'pending' if status_filter == 'pending' else '' }}</h3></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

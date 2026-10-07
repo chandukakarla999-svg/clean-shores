@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+{% block title %}About CleanShores{% endblock %}
+
+{% block content %}
+<section class="about-hero">
+    <div class="section-container">
+        <div class="section-header">
+            <span class="section-badge">Our Mission</span>
+            <h1 class="section-title">About CleanShores</h1>
+            <p class="section-subtitle">Citizen-driven, community-powered, science-backed — transforming India's coastlines and urban spaces one drive at a time.</p>
+        </div>
+    </div>
+</section>
+
+<section style="padding:4rem 0; background:#fff;">
+    <div class="section-container">
+        <div class="about-grid">
+            <div class="about-text">
+                <h2 style="color:#0B2545;">Why CleanShores?</h2>
+                <p>India generates over 62 million tonnes of waste annually, with a significant portion ending up on beaches, rivers, and urban drains. The existing challenge is not a lack of willing citizens — it's a lack of <strong>coordination, verification, and transparent impact measurement</strong>.</p>
+                <p style="margin-top:1rem;">CleanShores bridges this gap by creating a trusted, verified platform where:</p>
+                <ul style="padding-left:1.5rem; color:#555; margin-top:0.5rem; line-height:2;">
+                    <li>NGOs, colleges, and community groups can list cleanup drives with full accountability</li>
+                    <li>Citizens can discover, register, and participate in verified drives near them</li>
+                    <li>Every drive produces a public waste segregation impact report</li>
+                    <li>Volunteers receive certified digital certificates of eco-contribution</li>
+                </ul>
+            </div>
+            <div class="about-process-visual">
+                <div class="about-step-flow">
+                    <div class="about-step"><div class="about-step-icon" style="background:#0B2545;">🙋</div><span>Register</span></div>
+                    <div class="about-arrow">→</div>
+                    <div class="about-step"><div class="about-step-icon" style="background:#028090;">🛡️</div><span>Verify</span></div>
+                    <div class="about-arrow">→</div>
+                    <div class="about-step"><div class="about-step-icon" style="background:#00A896;">📅</div><span>Drive</span></div>
+                    <div class="about-arrow">→</div>
+                    <div class="about-step"><div class="about-step-icon" style="background:#02C39A;">♻️</div><span>Segregate</span></div>
+                    <div class="about-arrow">→</div>
+                    <div class="about-step"><div class="about-step-icon" style="background:#F4A261;">🏅</div><span>Certify</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-values" style="margin-top:3rem;">
+            <h2 style="color:#0B2545; text-align:center; margin-bottom:2rem;">Our Core Values</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🌊</div>
+                    <h4>Ocean First</h4>
+                    <p>Every decision prioritizes the health of our marine ecosystems and coastal biodiversity.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">♻️</div>
+                    <h4>Zero Waste Science</h4>
+                    <p>We promote scientific waste segregation — plastic, glass, metal, organic, hazardous — for maximum recycling impact.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🛡️</div>
+                    <h4>Verified Integrity</h4>
+                    <p>Only verified organizers can host drives, ensuring every event meets quality and safety standards.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">👥</div>
+                    <h4>Community First</h4>
+                    <p>We believe local communities are the most powerful agents of environmental change.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">📊</div>
+                    <h4>Transparent Impact</h4>
+                    <p>Every kilogram of waste collected is publicly logged and attributable, building a culture of environmental accountability.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">🏅</div>
+                    <h4>Recognize & Reward</h4>
+                    <p>We celebrate volunteer contributions with digital certificates, badges, and impact hours — building eco-portfolios for students and professionals.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="about-roadmap" style="margin-top:4rem;">
+            <h2 style="color:#0B2545; text-align:center; margin-bottom:2rem;">🗺️ Future Roadmap</h2>
+            <div class="roadmap-grid">
+                <div class="roadmap-item roadmap-done"><div class="roadmap-icon">✅</div><div><strong>Phase 1: Foundation</strong><br>Drive coordination, volunteer registration, organizer verification, impact reports</div></div>
+                <div class="roadmap-item roadmap-active"><div class="roadmap-icon">🔄</div><div><strong>Phase 2: Community</strong><br>Live chat, drive Q&amp;A, social sharing, volunteer leaderboards</div></div>
+                <div class="roadmap-item roadmap-future"><div class="roadmap-icon">🔮</div><div><strong>Phase 3: Analytics</strong><br>City-level waste heatmaps, plastic pollution tracking, government API integration</div></div>
+                <div class="roadmap-item roadmap-future"><div class="roadmap-icon">🚀</div><div><strong>Phase 4: Mobile</strong><br>iOS &amp; Android apps, GPS-enabled drive tracking, QR code attendance</div></div>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top:4rem; padding:3rem; background:linear-gradient(135deg,#0B2545,#028090); border-radius:20px; color:#fff;">
+            <h2>Ready to Make a Difference?</h2>
+            <p style="color:#b2e0f0; margin:1rem 0;">Join CleanShores today and become part of India's largest citizen cleanup network.</p>
+            {% if not current_user %}
+            <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap; margin-top:1.5rem;">
+                <a href="{{ url_for('auth.register') }}" class="btn-hero-primary" style="background:#02C39A; border:none;">Register as Volunteer</a>
+                <a href="{{ url_for('auth.register') }}" class="btn-hero-secondary" style="border-color:#fff; color:#fff;">Register as Organizer</a>
+            </div>
+            {% else %}
+            <a href="{{ url_for('drives.browse_drives') }}" class="btn-hero-primary" style="background:#02C39A; border:none; display:inline-flex; margin-top:1rem;">Browse Upcoming Drives</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}

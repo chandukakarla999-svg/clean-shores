@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block title %}My Registrations{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'volunteer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">My Registrations</h1>
+                <p class="dashboard-page-sub">Track your volunteer journey and eco-impact certificates.</p>
+            </div>
+            <a href="{{ url_for('drives.browse_drives') }}" class="btn-topbar-action">
+                <i class="fa-solid fa-plus"></i> Join More Drives
+            </a>
+        </div>
+
+        <div class="filter-tabs">
+            <a href="{{ url_for('volunteer.my_registrations') }}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+            <a href="{{ url_for('volunteer.my_registrations', status='registered') }}" class="filter-tab {% if status_filter=='registered' %}active{% endif %}">Registered</a>
+            <a href="{{ url_for('volunteer.my_registrations', status='confirmed') }}" class="filter-tab {% if status_filter=='confirmed' %}active{% endif %}">Confirmed</a>
+            <a href="{{ url_for('volunteer.my_registrations', status='attended') }}" class="filter-tab {% if status_filter=='attended' %}active{% endif %}">Attended</a>
+            <a href="{{ url_for('volunteer.my_registrations', status='cancelled') }}" class="filter-tab {% if status_filter=='cancelled' %}active{% endif %}">Cancelled</a>
+        </div>
+
+        {% if participations %}
+        <div class="registrations-list">
+            {% for p in participations %}
+            <div class="reg-item {% if p.status == 'cancelled' %}reg-item-cancelled{% endif %}">
+                <div class="reg-item-banner" style="background:linear-gradient(135deg, #0B2545, #028090);">
+                    <div class="reg-category-icon">{{ {'Beach Cleanup':'🏖️','Urban Cleanup':'🏙️','River Cleanup':'🌊','Park Cleanup':'🌳','Waste Segregation Drive':'♻️','Awareness Campaign':'📢'}.get(p.drive.category,'🌿') }}</div>
+                </div>
+                <div class="reg-item-body">
+                    <div class="reg-item-header">
+                        <h3><a href="{{ url_for('drives.drive_detail', drive_id=p.drive.id) }}" class="table-link">{{ p.drive.title }}</a></h3>
+                        <span class="status-badge status-{{ p.status }}">{{ p.status.title() }}</span>
+                    </div>
+                    <div class="reg-item-meta">
+                        <span><i class="fa-solid fa-location-dot"></i> {{ p.drive.location_name }}, {{ p.drive.city }}</span>
+                        <span><i class="fa-regular fa-calendar"></i> {{ p.drive.start_datetime.strftime('%B %d, %Y') }}</span>
+                        <span><i class="fa-solid fa-clock"></i> {{ p.drive.start_datetime.strftime('%I:%M %p') }}</span>
+                        <span><i class="fa-solid fa-user-check"></i> Registered {{ p.registered_at.strftime('%b %d') }}</span>
+                    </div>
+                    {% if p.certificate_id %}
+                    <div class="certificate-display">
+                        <div class="cert-header"><i class="fa-solid fa-award"></i> Certificate of Eco-Contribution</div>
+                        <div class="cert-id">{{ p.certificate_id }}</div>
+                        <div class="cert-issued">Issued {{ p.certificate_issued_at.strftime('%b %d, %Y') if p.certificate_issued_at else '' }}</div>
+                    </div>
+                    {% endif %}
+                    <div class="reg-item-actions">
+                        <a href="{{ url_for('drives.drive_detail', drive_id=p.drive.id) }}" class="btn-table">
+                            <i class="fa-solid fa-eye"></i> View Drive
+                        </a>
+                        {% if p.status not in ('attended', 'cancelled') and p.drive.status == 'upcoming' %}
+                        <form method="POST" action="{{ url_for('drives.cancel_registration', drive_id=p.drive.id) }}" style="display:inline;">
+                            <button type="submit" class="btn-table btn-table-danger"
+                                onclick="return confirm('Cancel your registration for this drive?')">
+                                <i class="fa-solid fa-xmark"></i> Cancel
+                            </button>
+                        </form>
+                        {% endif %}
+                        {% if p.drive.organizer %}
+                        <a href="{{ url_for('volunteer.messages', **{'with': p.drive.organizer.id}) }}" class="btn-table btn-table-secondary">
+                            <i class="fa-solid fa-envelope"></i> Message Organizer
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">🌊</div>
+            <h3>No registrations found</h3>
+            <p>Discover upcoming cleanup drives and take your first step towards greener shores.</p>
+            <a href="{{ url_for('drives.browse_drives') }}" class="btn-hero-primary" style="display:inline-flex;margin-top:1rem;">
+                <i class="fa-solid fa-compass"></i> Browse Drives
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

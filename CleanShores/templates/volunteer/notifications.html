@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block title %}Notifications{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'volunteer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar"><h1 class="dashboard-page-title">Notifications</h1></div>
+        {% if notifications %}
+        <div class="notif-list notif-list-full">
+            {% for n in notifications %}
+            <div class="notif-item {% if not n.is_read %}notif-unread{% endif %} notif-item-{{ n.notification_type }}">
+                <div class="notif-item-icon">
+                    <i class="fa-solid {{ {'registration':'fa-user-plus','drive_update':'fa-calendar','certificate':'fa-award','message':'fa-envelope','verification':'fa-shield-halved','system':'fa-bell'}.get(n.notification_type,'fa-bell') }}"></i>
+                </div>
+                <div class="notif-item-body">
+                    <strong>{{ n.title }}</strong>
+                    <p>{{ n.message }}</p>
+                    {% if n.link %}<a href="{{ n.link }}" class="notif-action-link">View Details</a>{% endif %}
+                </div>
+                <div class="notif-item-time">{{ n.created_at | timesince }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="empty-state"><div class="empty-icon">🔔</div><h3>All caught up!</h3><p>No notifications yet.</p></div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block title %}All Drives - Admin{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand"><a href="{{ url_for('index') }}">🌊 CleanShores</a></div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+            <a href="{{ url_for('admin.organizers') }}" class="sidebar-link"><i class="fa-solid fa-shield-halved"></i> <span>Verifications</span></a>
+            <a href="{{ url_for('admin.drives') }}" class="sidebar-link active"><i class="fa-solid fa-calendar-days"></i> <span>All Drives</span></a>
+            <a href="{{ url_for('admin.users') }}" class="sidebar-link"><i class="fa-solid fa-users"></i> <span>Users</span></a>
+            <div class="sidebar-divider"></div>
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></a>
+        </nav>
+    </aside>
+    <div class="dashboard-main">
+        <div class="dashboard-topbar"><h1 class="dashboard-page-title">All Drives</h1></div>
+        <div class="filter-tabs">
+            <a href="{{ url_for('admin.drives') }}" class="filter-tab {% if not status_filter %}active{% endif %}">All</a>
+            <a href="{{ url_for('admin.drives', status='upcoming') }}" class="filter-tab {% if status_filter=='upcoming' %}active{% endif %}">Upcoming</a>
+            <a href="{{ url_for('admin.drives', status='completed') }}" class="filter-tab {% if status_filter=='completed' %}active{% endif %}">Completed</a>
+            <a href="{{ url_for('admin.drives', status='cancelled') }}" class="filter-tab {% if status_filter=='cancelled' %}active{% endif %}">Cancelled</a>
+        </div>
+        <div class="drives-table-wrap">
+            <table class="cs-table">
+                <thead><tr><th>#</th><th>Title</th><th>Organizer</th><th>City</th><th>Date</th><th>Volunteers</th><th>Status</th><th>Action</th></tr></thead>
+                <tbody>
+                    {% for d in drives %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td><a href="{{ url_for('drives.drive_detail', drive_id=d.id) }}" class="table-link">{{ d.title[:40] }}</a></td>
+                        <td>{{ d.organizer.full_name }}</td>
+                        <td>{{ d.city }}</td>
+                        <td>{{ d.start_datetime.strftime('%b %d, %Y') }}</td>
+                        <td>{{ d.registered_count }}/{{ d.max_volunteers }}</td>
+                        <td><span class="status-badge status-{{ d.status }}">{{ d.status.replace('_',' ').title() }}</span></td>
+                        <td>
+                            {% if d.status != 'cancelled' %}
+                            <form method="POST" action="{{ url_for('admin.cancel_drive', drive_id=d.id) }}" style="display:inline;">
+                                <button type="submit" class="btn-table btn-table-danger" onclick="return confirm('Cancel this drive?')"><i class="fa-solid fa-ban"></i></button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

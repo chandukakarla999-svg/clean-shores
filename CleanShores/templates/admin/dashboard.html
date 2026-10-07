@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    <aside class="dashboard-sidebar">
+        <div class="sidebar-brand"><a href="{{ url_for('index') }}">🌊 CleanShores</a></div>
+        <div class="sidebar-user">
+            <div class="sidebar-avatar">A</div>
+            <div class="sidebar-user-info">
+                <span class="sidebar-user-name">Administrator</span>
+                <span class="sidebar-user-role"><i class="fa-solid fa-shield-halved"></i> Admin</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('admin.dashboard') }}" class="sidebar-link {% if request.endpoint=='admin.dashboard' %}active{% endif %}"><i class="fa-solid fa-gauge"></i> <span>Dashboard</span></a>
+            <a href="{{ url_for('admin.organizers') }}" class="sidebar-link {% if request.endpoint=='admin.organizers' %}active{% endif %}">
+                <i class="fa-solid fa-shield-halved"></i> <span>Verifications</span>
+                {% if pending_verifications > 0 %}<span class="sidebar-badge">{{ pending_verifications }}</span>{% endif %}
+            </a>
+            <a href="{{ url_for('admin.drives') }}" class="sidebar-link {% if request.endpoint=='admin.drives' %}active{% endif %}"><i class="fa-solid fa-calendar-days"></i> <span>All Drives</span></a>
+            <a href="{{ url_for('admin.users') }}" class="sidebar-link {% if request.endpoint=='admin.users' %}active{% endif %}"><i class="fa-solid fa-users"></i> <span>Users</span></a>
+            <div class="sidebar-divider"></div>
+            <a href="{{ url_for('index') }}" class="sidebar-link"><i class="fa-solid fa-earth-asia"></i> <span>Public Site</span></a>
+            <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-logout"><i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span></a>
+        </nav>
+    </aside>
+
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Admin Dashboard</h1>
+                <p class="dashboard-page-sub">Platform overview and management console.</p>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid stats-grid-6">
+            <div class="stat-card stat-card-blue"><div class="stat-card-icon"><i class="fa-solid fa-users"></i></div><div class="stat-card-value">{{ total_users }}</div><div class="stat-card-label">Total Users</div></div>
+            <div class="stat-card stat-card-teal"><div class="stat-card-icon"><i class="fa-solid fa-bullhorn"></i></div><div class="stat-card-value">{{ total_organizers }}</div><div class="stat-card-label">Organizers</div></div>
+            <div class="stat-card stat-card-green"><div class="stat-card-icon"><i class="fa-solid fa-person-hiking"></i></div><div class="stat-card-value">{{ total_volunteers }}</div><div class="stat-card-label">Volunteers</div></div>
+            <div class="stat-card stat-card-orange"><div class="stat-card-icon"><i class="fa-solid fa-calendar-days"></i></div><div class="stat-card-value">{{ total_drives }}</div><div class="stat-card-label">Total Drives</div></div>
+            <div class="stat-card stat-card-blue"><div class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></div><div class="stat-card-value">{{ completed_drives }}</div><div class="stat-card-label">Completed</div></div>
+            <div class="stat-card {% if pending_verifications > 0 %}stat-card-warn{% else %}stat-card-green{% endif %}">
+                <div class="stat-card-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                <div class="stat-card-value">{{ pending_verifications }}</div>
+                <div class="stat-card-label">Pending Verifs</div>
+            </div>
+        </div>
+
+        <!-- Email Log -->
+        {% if email_logs %}
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>📧 Email Activity Log (Last 10)</h2>
+            </div>
+            <div class="drives-table-wrap">
+                <table class="cs-table" style="font-size:0.82rem;">
+                    <thead><tr><th>Timestamp</th><th>To</th><th>Subject</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for log in email_logs[:10] %}
+                        <tr>
+                            <td>{{ log.timestamp }}</td>
+                            <td>{{ log.to }}</td>
+                            <td>{{ log.subject[:55] }}...</td>
+                            <td><span class="status-badge {% if 'Simulated' in log.status %}status-upcoming{% elif 'Delivered' in log.status %}status-completed{% else %}status-cancelled{% endif %}">{{ log.status }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Recent Users -->
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>Recent Registrations</h2>
+                <a href="{{ url_for('admin.users') }}" class="section-see-all">See all users</a>
+            </div>
+            <div class="drives-table-wrap">
+                <table class="cs-table">
+                    <thead><tr><th>Name</th><th>Username</th><th>Email</th><th>Role</th><th>Joined</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for u in recent_users %}
+                        <tr>
+                            <td>{{ u.full_name }}</td>
+                            <td>@{{ u.username }}</td>
+                            <td>{{ u.email }}</td>
+                            <td><span class="tag tag-{{ u.role }}">{{ u.role.capitalize() }}</span></td>
+                            <td>{{ u.created_at.strftime('%b %d, %Y') }}</td>
+                            <td><span class="status-badge {% if u.is_active %}status-completed{% else %}status-cancelled{% endif %}">{{ 'Active' if u.is_active else 'Deactivated' }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

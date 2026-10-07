@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Completed Drives - Impact Board{% endblock %}
+
+{% block content %}
+<div class="browse-header">
+    <div class="section-container">
+        <h1 class="browse-title">🏆 Community Impact Board</h1>
+        <p class="browse-subtitle">Verified, completed cleanup drives with full waste segregation reports and environmental impact data.</p>
+    </div>
+</div>
+
+<div class="section-container" style="padding-top:2rem; padding-bottom:4rem;">
+    {% if drives %}
+    <div class="completed-drives-grid">
+        {% for drive in drives %}
+        <div class="completed-drive-card">
+            <div class="cd-banner" style="background:linear-gradient(135deg,#0B2545,#028090);">
+                {% if drive.banner_image %}
+                <img src="{{ url_for('uploaded_drive_photo', filename=drive.banner_image) }}" class="drive-banner-img" alt="">
+                {% else %}
+                <div class="drive-banner-icon">{{ {'Beach Cleanup':'🏖️','Urban Cleanup':'🏙️','River Cleanup':'🌊','Park Cleanup':'🌳','Waste Segregation Drive':'♻️','Awareness Campaign':'📢'}.get(drive.category,'🌿') }}</div>
+                {% endif %}
+                <div class="cd-overlay">
+                    <span class="drive-category-tag">{{ drive.category }}</span>
+                    <span class="status-badge status-completed">Completed ✅</span>
+                </div>
+            </div>
+            <div class="cd-body">
+                <h3><a href="{{ url_for('drives.drive_detail', drive_id=drive.id) }}" class="table-link">{{ drive.title }}</a></h3>
+                <div class="cd-meta">
+                    <span><i class="fa-solid fa-location-dot"></i> {{ drive.city }}</span>
+                    <span><i class="fa-regular fa-calendar"></i> {{ drive.start_datetime.strftime('%b %d, %Y') }}</span>
+                    <span><i class="fa-solid fa-users"></i> {{ drive.attended_count }} attended</span>
+                </div>
+                <div class="cd-organizer">By <strong>{{ drive.organizer.full_name }}</strong>
+                    {% if drive.organizer.is_verified %}<i class="fa-solid fa-circle-check" style="color:#02C39A;font-size:0.75rem;"></i>{% endif %}
+                </div>
+                {% if drive.report %}
+                <div class="cd-impact">
+                    <div class="impact-stat"><span class="is-val">{{ drive.report.total_waste_kg }} kg</span><span class="is-label">Total Waste</span></div>
+                    <div class="impact-stat"><span class="is-val">{{ drive.report.plastic_waste_kg }} kg</span><span class="is-label">Plastic</span></div>
+                    <div class="impact-stat"><span class="is-val">{{ drive.report.attendees_count }}</span><span class="is-label">Volunteers</span></div>
+                </div>
+                <div class="cd-summary">{{ drive.report.summary[:130] }}{% if drive.report.summary|length > 130 %}…{% endif %}</div>
+                {% endif %}
+                {% if drive.photos.count() > 0 %}
+                <div class="cd-photos-preview">
+                    {% for photo in drive.photos.limit(3).all() %}
+                    <img src="{{ url_for('uploaded_drive_photo', filename=photo.filename) }}" class="cd-photo-thumb" alt="">
+                    {% endfor %}
+                    {% if drive.photos.count() > 3 %}
+                    <div class="cd-photos-more">+{{ drive.photos.count() - 3 }}</div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <a href="{{ url_for('drives.drive_detail', drive_id=drive.id) }}" class="btn-drive-detail" style="margin-top:1rem; display:inline-flex;">
+                    View Full Report <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">🌊</div>
+        <h3>No completed drives yet</h3>
+        <p>Check back after upcoming drives finish to see impact reports and waste segregation data.</p>
+        <a href="{{ url_for('drives.browse_drives') }}" class="btn-hero-primary" style="display:inline-flex;margin-top:1.5rem;">Browse Upcoming Drives</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

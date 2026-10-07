@@ -1,0 +1,21 @@
+{
+  "name": "cleanshores",
+  "version": "1.0.0",
+  "description": "Citizen-Driven Beach & Urban Cleanup Coordination Platform",
+  "main": "app.py",
+  "scripts": {
+    "start": "python app.py",
+    "dev": "python app.py",
+    "seed": "python seed_db.py",
+    "test": "python -c \"import urllib.request; print('HTTP Status:', urllib.request.urlopen('http://127.0.0.1:5000').status)\""
+  },
+  "keywords": [
+    "cleanshores",
+    "beach-cleanup",
+    "volunteer",
+    "environment",
+    "flask"
+  ],
+  "author": "CleanShores Team",
+  "license": "MIT"
+}

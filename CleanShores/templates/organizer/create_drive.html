@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block title %}Create Cleanup Drive{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'organizer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Create New Drive</h1>
+                <p class="dashboard-page-sub">Publish a cleanup event and invite volunteers from your community.</p>
+            </div>
+        </div>
+
+        <div class="form-card">
+            <form method="POST" action="{{ url_for('organizer.create_drive') }}" enctype="multipart/form-data" id="createDriveForm">
+                <!-- Basic Info -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">1</div>
+                        <h3>Drive Information</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="title">Drive Title *</label>
+                        <input type="text" id="title" name="title" class="form-input"
+                               value="{{ form_data.get('title','') }}"
+                               placeholder="e.g., Juhu Beach Mega Cleanup Drive 2026" required>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="category">Category *</label>
+                            <select id="category" name="category" class="form-select" required>
+                                {% for cat in ['Beach Cleanup','Urban Cleanup','River Cleanup','Park Cleanup','Waste Segregation Drive','Awareness Campaign'] %}
+                                <option value="{{ cat }}" {% if form_data.get('category','Beach Cleanup')==cat %}selected{% endif %}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="max_volunteers">Max Volunteers *</label>
+                            <input type="number" id="max_volunteers" name="max_volunteers" class="form-input"
+                                   value="{{ form_data.get('max_volunteers', 50) }}" min="5" max="5000" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Description *</label>
+                        <textarea id="description" name="description" class="form-textarea" rows="4"
+                                  placeholder="Describe the drive objectives, expected outcomes, waste types to be collected..." required>{{ form_data.get('description','') }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="banner_image">Drive Banner Image</label>
+                        <div class="file-upload-zone" id="bannerZone">
+                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                            <p>Drag & drop or <label for="banner_image" style="color:var(--primary-teal);cursor:pointer;">browse files</label></p>
+                            <span>JPG, PNG, WEBP — Max 5MB</span>
+                            <input type="file" id="banner_image" name="banner_image" accept="image/*" class="file-input-hidden" onchange="previewBanner(this)">
+                        </div>
+                        <img id="bannerPreview" src="" alt="Banner Preview" class="banner-preview-img" style="display:none;">
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">2</div>
+                        <h3>Location Details</h3>
+                    </div>
+                    <div class="form-group">
+                        <label for="location_name">Location Name *</label>
+                        <input type="text" id="location_name" name="location_name" class="form-input"
+                               value="{{ form_data.get('location_name','') }}" placeholder="e.g., Juhu Beach" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="address">Full Address *</label>
+                        <input type="text" id="address" name="address" class="form-input"
+                               value="{{ form_data.get('address','') }}" placeholder="Full street address" required>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="city">City *</label>
+                            <input type="text" id="city" name="city" class="form-input"
+                                   value="{{ form_data.get('city','') }}" placeholder="Mumbai" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="state">State</label>
+                            <input type="text" id="state" name="state" class="form-input"
+                                   value="{{ form_data.get('state','') }}" placeholder="Maharashtra">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="meeting_point">Meeting Point</label>
+                        <input type="text" id="meeting_point" name="meeting_point" class="form-input"
+                               value="{{ form_data.get('meeting_point','') }}"
+                               placeholder="e.g., Main entrance near lifeguard post">
+                    </div>
+                </div>
+
+                <!-- Schedule -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">3</div>
+                        <h3>Date & Time</h3>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="start_datetime">Start Date & Time *</label>
+                            <input type="datetime-local" id="start_datetime" name="start_datetime"
+                                   class="form-input" value="{{ form_data.get('start_datetime','') }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="end_datetime">End Date & Time *</label>
+                            <input type="datetime-local" id="end_datetime" name="end_datetime"
+                                   class="form-input" value="{{ form_data.get('end_datetime','') }}" required>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Logistics -->
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">4</div>
+                        <h3>Logistics & Eco Plan</h3>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label for="supplies_provided">Supplies Provided</label>
+                            <textarea id="supplies_provided" name="supplies_provided" class="form-textarea" rows="3"
+                                      placeholder="Gloves, garbage bags, segregation bins...">{{ form_data.get('supplies_provided','') }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="supplies_needed">What to Bring</label>
+                            <textarea id="supplies_needed" name="supplies_needed" class="form-textarea" rows="3"
+                                      placeholder="Reusable water bottle, sturdy shoes, sunscreen...">{{ form_data.get('supplies_needed','') }}</textarea>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="waste_segregation_plan">Waste Segregation Methodology</label>
+                        <textarea id="waste_segregation_plan" name="waste_segregation_plan" class="form-textarea" rows="3"
+                                  placeholder="Describe how waste will be segregated: Plastic bins (blue), Organic (green), Hazardous (red)...">{{ form_data.get('waste_segregation_plan','') }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="safety_guidelines">Safety Guidelines</label>
+                        <textarea id="safety_guidelines" name="safety_guidelines" class="form-textarea" rows="3"
+                                  placeholder="Wear PPE, do not handle hazardous waste without gloves, stay in buddy system...">{{ form_data.get('safety_guidelines','') }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <a href="{{ url_for('organizer.my_drives') }}" class="btn-secondary-action">Cancel</a>
+                    <button type="submit" class="btn-primary-action">
+                        <i class="fa-solid fa-calendar-plus"></i> Publish Drive
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function previewBanner(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            const img = document.getElementById('bannerPreview');
+            img.src = e.target.result;
+            img.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+// Drag & drop zone
+const zone = document.getElementById('bannerZone');
+zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file) {
+        document.getElementById('banner_image').files = e.dataTransfer.files;
+        previewBanner(document.getElementById('banner_image'));
+    }
+});
+</script>
+{% endblock %}

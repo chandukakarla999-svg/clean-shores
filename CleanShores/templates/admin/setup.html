@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Setup Admin{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+{% block content %}
+<div class="auth-layout auth-layout-simple">
+    <div class="auth-card" style="max-width:480px; margin:6rem auto;">
+        <div class="auth-card-header" style="text-align:center;">
+            <div style="font-size:3rem; margin-bottom:1rem;">🛡️</div>
+            <h1>Admin Setup</h1>
+            <p>One-time administrator account creation. Requires the secret setup key.</p>
+        </div>
+        <form method="POST" class="auth-form">
+            <div class="form-group">
+                <label>Admin Email</label>
+                <input type="email" name="email" class="form-input" value="admin@cleanshores.org" required>
+            </div>
+            <div class="form-group">
+                <label>Admin Password</label>
+                <input type="password" name="password" class="form-input" placeholder="Set a strong password" required>
+            </div>
+            <div class="form-group">
+                <label>Secret Setup Key</label>
+                <input type="password" name="secret_key" class="form-input" placeholder="CleanShores-Admin-2026" required>
+            </div>
+            <button type="submit" class="btn-auth-submit">
+                <i class="fa-solid fa-shield-halved"></i> Create Admin Account
+            </button>
+        </form>
+        <p style="text-align:center;margin-top:1rem;font-size:0.8rem;color:#999;">Default secret key: <code>CleanShores-Admin-2026</code></p>
+    </div>
+</div>
+{% endblock %}

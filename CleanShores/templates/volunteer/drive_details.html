@@ -1,0 +1,268 @@
+{% extends "base.html" %}
+{% block title %}{{ drive.title }}{% endblock %}
+
+{% block content %}
+<div class="drive-detail-layout">
+    <div class="section-container">
+        <!-- Breadcrumb -->
+        <div class="breadcrumb">
+            <a href="{{ url_for('drives.browse_drives') }}">Browse Drives</a>
+            <i class="fa-solid fa-chevron-right"></i>
+            <span>{{ drive.title }}</span>
+        </div>
+
+        <div class="drive-detail-grid">
+            <!-- Main Content -->
+            <div class="drive-detail-main">
+                <!-- Banner -->
+                <div class="drive-detail-banner" style="background:linear-gradient(135deg, #0B2545, #028090);">
+                    {% if drive.banner_image %}
+                    <img src="{{ url_for('uploaded_drive_photo', filename=drive.banner_image) }}" class="drive-detail-banner-img" alt="{{ drive.title }}">
+                    {% else %}
+                    <div class="drive-detail-banner-icon">{{ {'Beach Cleanup':'🏖️','Urban Cleanup':'🏙️','River Cleanup':'🌊','Park Cleanup':'🌳','Waste Segregation Drive':'♻️','Awareness Campaign':'📢'}.get(drive.category,'🌿') }}</div>
+                    {% endif %}
+                    <div class="drive-detail-badge-row">
+                        <span class="drive-category-tag">{{ drive.category }}</span>
+                        <span class="status-badge status-{{ drive.status }}">{{ drive.status.replace('_',' ').title() }}</span>
+                        {% if drive.organizer.is_verified %}
+                        <span class="drive-verified-badge"><i class="fa-solid fa-circle-check"></i> Verified Organizer</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="drive-detail-content">
+                    <h1 class="drive-detail-title">{{ drive.title }}</h1>
+
+                    <div class="drive-detail-meta-row">
+                        <div class="meta-item"><i class="fa-solid fa-location-dot"></i> {{ drive.location_name }}, {{ drive.city }}, {{ drive.state }}</div>
+                        <div class="meta-item"><i class="fa-regular fa-calendar"></i> {{ drive.start_datetime.strftime('%A, %B %d, %Y') }}</div>
+                        <div class="meta-item"><i class="fa-solid fa-clock"></i> {{ drive.start_datetime.strftime('%I:%M %p') }} – {{ drive.end_datetime.strftime('%I:%M %p') }}</div>
+                        <div class="meta-item"><i class="fa-solid fa-users"></i> {{ drive.registered_count }} / {{ drive.max_volunteers }} volunteers</div>
+                    </div>
+
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-circle-info"></i> About This Drive</h3>
+                        <p>{{ drive.description }}</p>
+                    </div>
+
+                    {% if drive.meeting_point %}
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-flag"></i> Meeting Point</h3>
+                        <p>{{ drive.meeting_point }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if drive.supplies_provided %}
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-kit-medical"></i> What We Provide</h3>
+                        <p>{{ drive.supplies_provided }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if drive.supplies_needed %}
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-bag-shopping"></i> What to Bring</h3>
+                        <p>{{ drive.supplies_needed }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if drive.waste_segregation_plan %}
+                    <div class="drive-detail-section eco-plan-section">
+                        <h3><i class="fa-solid fa-recycle"></i> Waste Segregation Plan</h3>
+                        <p>{{ drive.waste_segregation_plan }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if drive.safety_guidelines %}
+                    <div class="drive-detail-section safety-section">
+                        <h3><i class="fa-solid fa-triangle-exclamation"></i> Safety Guidelines</h3>
+                        <p>{{ drive.safety_guidelines }}</p>
+                    </div>
+                    {% endif %}
+
+                    <!-- Impact Report for Completed -->
+                    {% if drive.status == 'completed' and drive.report %}
+                    <div class="drive-detail-section impact-report-section">
+                        <h3><i class="fa-solid fa-chart-pie"></i> Impact Report</h3>
+                        <div class="impact-report-card">
+                            <div class="ir-summary">{{ drive.report.summary }}</div>
+                            <div class="waste-breakdown-grid">
+                                <div class="wb-item wb-plastic"><span class="wb-label">Plastic</span><span class="wb-val">{{ drive.report.plastic_waste_kg }} kg</span></div>
+                                <div class="wb-item wb-glass"><span class="wb-label">Glass</span><span class="wb-val">{{ drive.report.glass_waste_kg }} kg</span></div>
+                                <div class="wb-item wb-metal"><span class="wb-label">Metal</span><span class="wb-val">{{ drive.report.metal_waste_kg }} kg</span></div>
+                                <div class="wb-item wb-organic"><span class="wb-label">Organic</span><span class="wb-val">{{ drive.report.organic_waste_kg }} kg</span></div>
+                                <div class="wb-item wb-hazardous"><span class="wb-label">Hazardous</span><span class="wb-val">{{ drive.report.hazardous_waste_kg }} kg</span></div>
+                                <div class="wb-item wb-total"><span class="wb-label">TOTAL</span><span class="wb-val">{{ drive.report.total_waste_kg }} kg</span></div>
+                            </div>
+                            <canvas id="wasteChart" width="300" height="220" style="margin-top:1rem; max-width:320px;"></canvas>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Photos -->
+                    {% if photos %}
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-images"></i> Photos from the Drive</h3>
+                        <div class="drive-photos-grid">
+                            {% for photo in photos %}
+                            <div class="drive-photo-item">
+                                <img src="{{ url_for('uploaded_drive_photo', filename=photo.filename) }}" alt="{{ photo.caption or 'Drive photo' }}" loading="lazy">
+                                {% if photo.caption %}<p class="photo-caption">{{ photo.caption }}</p>{% endif %}
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Q&A -->
+                    <div class="drive-detail-section">
+                        <h3><i class="fa-solid fa-comments"></i> Community Q&A</h3>
+                        {% if qa_messages %}
+                        {% for q in qa_messages %}
+                        <div class="qa-item">
+                            <div class="qa-question">
+                                <div class="qa-avatar">{{ q.sender.full_name[0].upper() }}</div>
+                                <div>
+                                    <strong>{{ q.sender.full_name }}</strong>
+                                    <p>{{ q.message_text }}</p>
+                                </div>
+                            </div>
+                            {% if q.answer_text %}
+                            <div class="qa-answer">
+                                <i class="fa-solid fa-reply"></i>
+                                <p>{{ q.answer_text }}</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                        {% else %}
+                        <p class="text-muted">No questions yet. Be the first to ask!</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="drive-detail-sidebar">
+                <!-- Registration Card -->
+                <div class="registration-card">
+                    <div class="reg-card-header">
+                        <div class="reg-progress">
+                            <div class="reg-progress-fill" style="width:{{ drive.fill_percentage }}%"></div>
+                        </div>
+                        <div class="reg-spots">
+                            <span><strong>{{ drive.spots_remaining }}</strong> spots left</span>
+                            <span>{{ drive.registered_count }}/{{ drive.max_volunteers }}</span>
+                        </div>
+                    </div>
+
+                    {% if drive.status == 'upcoming' %}
+                        {% if current_user and current_user.role == 'volunteer' %}
+                            {% if user_participation and user_participation.status != 'cancelled' %}
+                            <div class="reg-confirmed-badge">
+                                <i class="fa-solid fa-circle-check"></i>
+                                You're registered!
+                                <span class="status-badge status-{{ user_participation.status }}">{{ user_participation.status.title() }}</span>
+                            </div>
+                            {% if user_participation.certificate_id %}
+                            <div class="cert-display">
+                                <i class="fa-solid fa-award"></i>
+                                Certificate: <strong>{{ user_participation.certificate_id }}</strong>
+                            </div>
+                            {% endif %}
+                            <form method="POST" action="{{ url_for('drives.cancel_registration', drive_id=drive.id) }}" class="cancel-form">
+                                <button type="submit" class="btn-cancel-reg" onclick="return confirm('Cancel your registration for this drive?')">
+                                    Cancel Registration
+                                </button>
+                            </form>
+                            {% elif not drive.is_full %}
+                            <form method="POST" action="{{ url_for('drives.register_for_drive', drive_id=drive.id) }}" class="register-form">
+                                <div class="form-group">
+                                    <label>Emergency Contact (Optional)</label>
+                                    <input type="text" name="emergency_contact" class="form-input" placeholder="Name & Phone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Any notes for organizer?</label>
+                                    <textarea name="notes" class="form-textarea" rows="2" placeholder="Dietary needs, special assistance..."></textarea>
+                                </div>
+                                <button type="submit" class="btn-register-now">
+                                    <i class="fa-solid fa-hand-holding-heart"></i> Register Now
+                                </button>
+                            </form>
+                            {% else %}
+                            <div class="reg-full-notice">🚫 This drive is at full capacity. Check other drives!</div>
+                            {% endif %}
+                        {% elif not current_user %}
+                        <div class="reg-login-prompt">
+                            <p>Join CleanShores to register for this drive.</p>
+                            <a href="{{ url_for('auth.login') }}" class="btn-register-now">Login to Register</a>
+                            <a href="{{ url_for('auth.register') }}" class="btn-link-register">Create Account</a>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                    <div class="drive-ended-notice">
+                        This drive has {{ drive.status.replace('_', ' ') }}.
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Organizer Card -->
+                <div class="organizer-card">
+                    <h4>Organized by</h4>
+                    <div class="organizer-info">
+                        <div class="organizer-avatar-lg">{{ drive.organizer.full_name[0].upper() }}</div>
+                        <div>
+                            <strong>{{ drive.organizer.full_name }}</strong>
+                            {% if drive.organizer.is_verified %}
+                            <div class="verified-org-badge"><i class="fa-solid fa-circle-check"></i> Verified Organizer</div>
+                            {% endif %}
+                            {% if drive.organizer.college_or_org %}
+                            <div class="organizer-org">{{ drive.organizer.college_or_org }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if current_user and current_user.id != drive.organizer.id %}
+                    <a href="{% if current_user.role == 'volunteer' %}{{ url_for('volunteer.messages', **{'with': drive.organizer.id}) }}{% else %}#{% endif %}" class="btn-contact-organizer">
+                        <i class="fa-solid fa-envelope"></i> Contact Organizer
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if drive.status == 'completed' and drive.report %}
+<script>
+const ctx = document.getElementById('wasteChart');
+if (ctx) {
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Plastic', 'Glass', 'Metal', 'Organic', 'Hazardous', 'Other'],
+            datasets: [{
+                data: [
+                    {{ drive.report.plastic_waste_kg }},
+                    {{ drive.report.glass_waste_kg }},
+                    {{ drive.report.metal_waste_kg }},
+                    {{ drive.report.organic_waste_kg }},
+                    {{ drive.report.hazardous_waste_kg }},
+                    {{ drive.report.other_waste_kg }}
+                ],
+                backgroundColor: ['#3B82F6','#10B981','#F59E0B','#8B5CF6','#EF4444','#6B7280'],
+                borderWidth: 2,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11 } } }
+            }
+        }
+    });
+}
+</script>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+{% block title %}Participants - {{ drive.title }}{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'organizer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Participants</h1>
+                <p class="dashboard-page-sub">{{ drive.title }} &mdash; {{ drive.registered_count }}/{{ drive.max_volunteers }} registered</p>
+            </div>
+            <a href="{{ url_for('organizer.my_drives') }}" class="btn-topbar-back">
+                <i class="fa-solid fa-arrow-left"></i> Back to Drives
+            </a>
+        </div>
+
+        <div class="drive-summary-banner">
+            <div class="dsb-item"><i class="fa-solid fa-location-dot"></i> {{ drive.city }}</div>
+            <div class="dsb-item"><i class="fa-regular fa-calendar"></i> {{ drive.start_datetime.strftime('%B %d, %Y') }}</div>
+            <div class="dsb-item"><i class="fa-solid fa-clock"></i> {{ drive.start_datetime.strftime('%I:%M %p') }}</div>
+            <div class="dsb-item"><span class="status-badge status-{{ drive.status }}">{{ drive.status.title() }}</span></div>
+        </div>
+
+        {% if participations %}
+        <div class="participants-wrap">
+            <div class="participants-stats">
+                {% set counts = {'registered': 0, 'confirmed': 0, 'attended': 0, 'cancelled': 0} %}
+                {% for p in participations %}{% if p.status in counts %}{% set _ = counts.update({p.status: counts[p.status] + 1}) %}{% endif %}{% endfor %}
+                <div class="pstat"><span class="pstat-val">{{ participations|length }}</span><span class="pstat-label">Total</span></div>
+                <div class="pstat"><span class="pstat-val" style="color:#3B82F6">{{ counts.registered }}</span><span class="pstat-label">Registered</span></div>
+                <div class="pstat"><span class="pstat-val" style="color:#00A896">{{ counts.confirmed }}</span><span class="pstat-label">Confirmed</span></div>
+                <div class="pstat"><span class="pstat-val" style="color:#02C39A">{{ counts.attended }}</span><span class="pstat-label">Attended</span></div>
+                <div class="pstat"><span class="pstat-val" style="color:#E76F51">{{ counts.cancelled }}</span><span class="pstat-label">Cancelled</span></div>
+            </div>
+
+            <div class="drives-table-wrap">
+                <table class="cs-table">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Volunteer</th>
+                            <th>Contact</th>
+                            <th>College/Org</th>
+                            <th>Registered</th>
+                            <th>Status</th>
+                            <th>Certificate</th>
+                            <th>Update Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for p in participations %}
+                        <tr class="{% if p.status == 'cancelled' %}row-cancelled{% endif %}">
+                            <td>{{ loop.index }}</td>
+                            <td>
+                                <div class="table-volunteer">
+                                    <div class="table-avatar">{{ p.volunteer.full_name[0].upper() }}</div>
+                                    <div>
+                                        <strong>{{ p.volunteer.full_name }}</strong><br>
+                                        <small>@{{ p.volunteer.username }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <small>{{ p.volunteer.email }}</small><br>
+                                <small>{{ p.volunteer.phone or '-' }}</small>
+                            </td>
+                            <td><small>{{ p.volunteer.college_or_org or '-' }}</small></td>
+                            <td><small>{{ p.registered_at.strftime('%b %d, %I:%M %p') }}</small></td>
+                            <td><span class="status-badge status-{{ p.status }}">{{ p.status.title() }}</span></td>
+                            <td>
+                                {% if p.certificate_id %}
+                                <span class="cert-badge" title="{{ p.certificate_id }}">
+                                    <i class="fa-solid fa-award"></i> {{ p.certificate_id }}
+                                </span>
+                                {% else %}
+                                <span class="text-muted">—</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <form method="POST" action="{{ url_for('organizer.update_participant_status', drive_id=drive.id, part_id=p.id) }}" class="inline-status-form">
+                                    <select name="status" class="select-status select-status-{{ p.status }}" onchange="this.form.submit()">
+                                        <option value="registered" {% if p.status=='registered' %}selected{% endif %}>Registered</option>
+                                        <option value="confirmed" {% if p.status=='confirmed' %}selected{% endif %}>Confirmed</option>
+                                        <option value="attended" {% if p.status=='attended' %}selected{% endif %}>Attended ✅</option>
+                                        <option value="cancelled" {% if p.status=='cancelled' %}selected{% endif %}>Cancelled</option>
+                                    </select>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-icon">👥</div>
+            <h3>No volunteers registered yet</h3>
+            <p>Share your drive on social media and invite eco-conscious citizens!</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% block title %}Organizer Dashboard{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'organizer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Dashboard</h1>
+                <p class="dashboard-page-sub">Welcome back, <strong>{{ user.full_name }}</strong>! Here's your organizer overview.</p>
+            </div>
+            <div class="topbar-actions">
+                <a href="{{ url_for('organizer.create_drive') }}" class="btn-topbar-action">
+                    <i class="fa-solid fa-plus"></i> New Drive
+                </a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="stats-grid">
+            <div class="stat-card stat-card-blue">
+                <div class="stat-card-icon"><i class="fa-solid fa-calendar-days"></i></div>
+                <div class="stat-card-value">{{ total_drives }}</div>
+                <div class="stat-card-label">Total Drives</div>
+            </div>
+            <div class="stat-card stat-card-teal">
+                <div class="stat-card-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                <div class="stat-card-value">{{ upcoming_drives }}</div>
+                <div class="stat-card-label">Upcoming</div>
+            </div>
+            <div class="stat-card stat-card-green">
+                <div class="stat-card-icon"><i class="fa-solid fa-circle-check"></i></div>
+                <div class="stat-card-value">{{ completed_drives }}</div>
+                <div class="stat-card-label">Completed</div>
+            </div>
+            <div class="stat-card stat-card-orange">
+                <div class="stat-card-icon"><i class="fa-solid fa-users"></i></div>
+                <div class="stat-card-value">{{ total_volunteers }}</div>
+                <div class="stat-card-label">Total Volunteers</div>
+            </div>
+        </div>
+
+        <!-- Recent Drives -->
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>Recent Drives</h2>
+                <a href="{{ url_for('organizer.my_drives') }}" class="section-see-all">See all <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            {% if drives %}
+            <div class="drives-table-wrap">
+                <table class="cs-table">
+                    <thead>
+                        <tr>
+                            <th>Drive Title</th>
+                            <th>Category</th>
+                            <th>Location</th>
+                            <th>Date</th>
+                            <th>Volunteers</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for drive in drives %}
+                        <tr>
+                            <td><a href="{{ url_for('drives.drive_detail', drive_id=drive.id) }}" class="table-link">{{ drive.title }}</a></td>
+                            <td><span class="tag tag-category">{{ drive.category }}</span></td>
+                            <td>{{ drive.city }}</td>
+                            <td>{{ drive.start_datetime.strftime('%b %d, %Y') }}</td>
+                            <td>
+                                <div class="mini-progress">
+                                    <span>{{ drive.registered_count }}/{{ drive.max_volunteers }}</span>
+                                </div>
+                            </td>
+                            <td><span class="status-badge status-{{ drive.status }}">{{ drive.status.replace('_',' ').title() }}</span></td>
+                            <td class="table-actions">
+                                <a href="{{ url_for('organizer.participants', drive_id=drive.id) }}" class="btn-table" title="View Participants"><i class="fa-solid fa-users"></i></a>
+                                {% if drive.status == 'upcoming' %}
+                                <a href="{{ url_for('organizer.complete_drive', drive_id=drive.id) }}" class="btn-table btn-table-green" title="Mark Complete"><i class="fa-solid fa-check"></i></a>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state-small">
+                <i class="fa-solid fa-calendar-plus"></i>
+                <p>No drives yet. <a href="{{ url_for('organizer.create_drive') }}">Create your first drive</a>.</p>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Recent Notifications -->
+        {% if recent_notifications %}
+        <div class="dashboard-section">
+            <div class="section-row-header">
+                <h2>Recent Notifications</h2>
+                <a href="{{ url_for('organizer.notifications') }}" class="section-see-all">See all</a>
+            </div>
+            <div class="notif-list">
+                {% for n in recent_notifications %}
+                <div class="notif-item notif-item-{{ n.notification_type }}">
+                    <div class="notif-item-icon">
+                        <i class="fa-solid {{ {'registration': 'fa-user-plus', 'drive_update': 'fa-calendar', 'verification': 'fa-shield-halved', 'message': 'fa-envelope', 'certificate': 'fa-award'}.get(n.notification_type, 'fa-bell') }}"></i>
+                    </div>
+                    <div class="notif-item-body">
+                        <strong>{{ n.title }}</strong>
+                        <p>{{ n.message }}</p>
+                    </div>
+                    <div class="notif-item-time">{{ n.created_at | timesince }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+<aside class="dashboard-sidebar">
+    <div class="sidebar-brand">
+        <a href="{{ url_for('index') }}">🌊 CleanShores</a>
+    </div>
+    <div class="sidebar-user">
+        <div class="sidebar-avatar">{{ current_user.full_name[0].upper() }}</div>
+        <div class="sidebar-user-info">
+            <span class="sidebar-user-name">{{ current_user.full_name }}</span>
+            <span class="sidebar-user-role"><i class="fa-solid fa-person-hiking"></i> Volunteer</span>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <a href="{{ url_for('volunteer.dashboard') }}" class="sidebar-link {% if request.endpoint == 'volunteer.dashboard' %}active{% endif %}">
+            <i class="fa-solid fa-gauge"></i> <span>Dashboard</span>
+        </a>
+        <a href="{{ url_for('drives.browse_drives') }}" class="sidebar-link {% if request.endpoint == 'drives.browse_drives' %}active{% endif %}">
+            <i class="fa-solid fa-compass"></i> <span>Browse Drives</span>
+        </a>
+        <a href="{{ url_for('volunteer.my_registrations') }}" class="sidebar-link {% if request.endpoint == 'volunteer.my_registrations' %}active{% endif %}">
+            <i class="fa-solid fa-calendar-check"></i> <span>My Registrations</span>
+        </a>
+        <a href="{{ url_for('volunteer.messages') }}" class="sidebar-link {% if request.endpoint == 'volunteer.messages' %}active{% endif %}">
+            <i class="fa-solid fa-envelope"></i> <span>Messages</span>
+            {% if unread_messages > 0 %}<span class="sidebar-badge">{{ unread_messages }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('volunteer.notifications') }}" class="sidebar-link {% if request.endpoint == 'volunteer.notifications' %}active{% endif %}">
+            <i class="fa-solid fa-bell"></i> <span>Notifications</span>
+            {% if unread_notifications > 0 %}<span class="sidebar-badge">{{ unread_notifications }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('volunteer.profile') }}" class="sidebar-link {% if request.endpoint == 'volunteer.profile' %}active{% endif %}">
+            <i class="fa-solid fa-user-pen"></i> <span>My Profile</span>
+        </a>
+        <div class="sidebar-divider"></div>
+        <a href="{{ url_for('drives.completed_drives') }}" class="sidebar-link">
+            <i class="fa-solid fa-trophy"></i> <span>Impact Board</span>
+        </a>
+        <a href="{{ url_for('auth.logout') }}" class="sidebar-link sidebar-link-logout">
+            <i class="fa-solid fa-right-from-bracket"></i> <span>Log Out</span>
+        </a>
+    </nav>
+</aside>

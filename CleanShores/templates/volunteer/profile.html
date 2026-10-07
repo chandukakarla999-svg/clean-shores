@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'volunteer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <h1 class="dashboard-page-title">My Profile</h1>
+        </div>
+        <div class="profile-layout">
+            <!-- Profile Card -->
+            <div class="profile-card-side">
+                <div class="profile-avatar-lg">{{ user.full_name[0].upper() }}</div>
+                <h2 class="profile-name">{{ user.full_name }}</h2>
+                <div class="profile-username">@{{ user.username }}</div>
+                <div class="profile-role-badge role-{{ user.role }}">{{ user.role.capitalize() }}</div>
+                {% if user.college_or_org %}<div class="profile-org"><i class="fa-solid fa-building"></i> {{ user.college_or_org }}</div>{% endif %}
+                {% if user.location %}<div class="profile-org"><i class="fa-solid fa-location-dot"></i> {{ user.location }}</div>{% endif %}
+                {% if user.bio %}<p class="profile-bio">{{ user.bio }}</p>{% endif %}
+                <div class="profile-stats-mini">
+                    <div><span>{{ user.total_attended_drives }}</span><small>Drives</small></div>
+                    <div><span>{{ user.total_volunteer_hours }}</span><small>Hours</small></div>
+                    <div><span>{{ user.badges|length }}</span><small>Badges</small></div>
+                </div>
+            </div>
+            <!-- Edit Form -->
+            <div class="profile-edit-form">
+                <form method="POST" action="{{ url_for('volunteer.profile') }}" class="auth-form">
+                    <h3 style="color:#0B2545;margin-bottom:1.5rem;">Edit Profile</h3>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="full_name" class="form-input" value="{{ user.full_name }}">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" name="phone" class="form-input" value="{{ user.phone or '' }}">
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Location / City</label>
+                            <input type="text" name="location" class="form-input" value="{{ user.location or '' }}">
+                        </div>
+                        <div class="form-group">
+                            <label>College / Organization</label>
+                            <input type="text" name="college_or_org" class="form-input" value="{{ user.college_or_org or '' }}">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Skills & Interests</label>
+                        <input type="text" name="skills_interests" class="form-input"
+                               value="{{ user.skills_interests or '' }}"
+                               placeholder="e.g., Photography, First Aid, Waste Segregation, Marine Biology">
+                    </div>
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea name="bio" class="form-textarea" rows="3" placeholder="Tell the community about your eco-passion...">{{ user.bio or '' }}</textarea>
+                    </div>
+                    <h4 style="margin-top:1rem; color:#0B2545;">Change Password (leave blank to keep current)</h4>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <div class="input-with-icon">
+                                <input type="password" name="new_password" id="new_password" class="form-input" placeholder="Min 6 characters">
+                                <button type="button" class="toggle-password" onclick="togglePwdVisibility('new_password')"><i class="fa-solid fa-eye" id="new_password-eye"></i></button>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Email (read-only)</label>
+                            <input type="text" class="form-input" value="{{ user.email }}" readonly style="background:#f8fafc; cursor:not-allowed;">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-primary-action" style="margin-top:0.5rem;">
+                        <i class="fa-solid fa-floppy-disk"></i> Save Changes
+                    </button>
+                </form>
+
+                <!-- Badges Section -->
+                {% if user.badges %}
+                <div style="margin-top:2rem;">
+                    <h3 style="color:#0B2545;margin-bottom:1rem;">🏅 Your Badges</h3>
+                    <div class="badges-grid">
+                        {% for badge in user.badges %}
+                        <div class="badge-card">
+                            <div class="badge-icon" style="color:{{ badge.color }}"><i class="{{ badge.icon }}"></i></div>
+                            <div class="badge-name">{{ badge.name }}</div>
+                            <div class="badge-desc">{{ badge.desc }}</div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,644 @@
+{% extends "base.html" %}
+{% block title %}Organizer Portal - Sign In & Register Organization{% endblock %}
+{% block body_class %}auth-page{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <!-- Ambient Ocean Glow -->
+    <div class="auth-ambient">
+        <div class="glow-orb orb-org-1"></div>
+        <div class="glow-orb orb-org-2"></div>
+    </div>
+
+    <div class="auth-card-container">
+        <!-- Brand & Portal Tag -->
+        <div class="auth-portal-header">
+            <a href="{{ url_for('index') }}" class="portal-back-home">
+                <i class="fa-solid fa-arrow-left"></i> Home
+            </a>
+            <div class="role-tag organizer-tag">
+                <i class="fa-solid fa-bullhorn"></i> ORGANIZER PORTAL
+            </div>
+        </div>
+
+        <div class="auth-main-card auth-organizer-card">
+            <!-- Tab Switcher (Login vs Create Account on SAME PAGE) -->
+            <div class="auth-tabs">
+                <button type="button" class="auth-tab-btn {% if active_tab != 'register' %}active{% endif %}" id="tabBtnLogin" onclick="switchAuthTab('login')">
+                    <i class="fa-solid fa-right-to-bracket"></i> Sign In
+                </button>
+                <button type="button" class="auth-tab-btn {% if active_tab == 'register' %}active{% endif %}" id="tabBtnRegister" onclick="switchAuthTab('register')">
+                    <i class="fa-solid fa-user-plus"></i> Create Account
+                </button>
+            </div>
+
+            <!-- ==============================================
+                 LOGIN FORM (ORGANIZER)
+                 ============================================== -->
+            <div class="auth-pane" id="paneLogin" style="{% if active_tab == 'register' %}display: none;{% endif %}">
+                <div class="auth-pane-intro">
+                    <h2>Welcome, Drive Organizer!</h2>
+                    <p>Sign in to manage cleanup campaigns, volunteers, and track waste segregation reports.</p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.organizer_auth') }}" class="auth-modern-form">
+                    <input type="hidden" name="action" value="login">
+
+                    <div class="input-block">
+                        <label for="loginIdentifier"><i class="fa-solid fa-envelope"></i> Organizer Email or Username</label>
+                        <input type="text" id="loginIdentifier" name="identifier" class="clean-input"
+                                placeholder="organizer@cleanshores.org" required autocomplete="username"
+                                value="{{ form_data.get('identifier', '') }}">
+                    </div>
+
+                    <div class="input-block">
+                        <div class="label-row">
+                            <label for="loginPassword"><i class="fa-solid fa-lock"></i> Password</label>
+                            <a href="{{ url_for('auth.forgot_password') }}" class="link-subtle">Forgot password?</a>
+                        </div>
+                        <div class="input-with-eye">
+                            <input type="password" id="loginPassword" name="password" class="clean-input"
+                                   placeholder="••••••••" required autocomplete="current-password">
+                            <button type="button" class="eye-toggle" onclick="togglePass('loginPassword', 'eyeLoginOrg')">
+                                <i class="fa-solid fa-eye" id="eyeLoginOrg"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="remember-row">
+                        <label class="custom-checkbox">
+                            <input type="checkbox" name="remember_me" checked>
+                            <span>Remember me for 7 days</span>
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-auth-action btn-organizer-action">
+                        <i class="fa-solid fa-right-to-bracket"></i> Sign In as Organizer
+                    </button>
+                </form>
+
+                <!-- Fast Demo Login for preview -->
+                <div class="demo-box demo-box-org">
+                    <div class="demo-box-label">⚡ Fast Preview: One-Click Demo Account</div>
+                    <button type="button" class="btn-demo-fill btn-demo-org" onclick="fillOrganizerDemo()">
+                        <i class="fa-solid fa-bolt"></i> Auto-Fill Organizer Demo Login
+                    </button>
+                </div>
+
+                <div class="pane-switch-footer">
+                    <span>New organization or organizer?</span>
+                    <a href="javascript:void(0)" onclick="switchAuthTab('register')">Create an account now &rarr;</a>
+                </div>
+            </div>
+
+            <!-- ==============================================
+                 CREATE ACCOUNT FORM (ORGANIZER)
+                 ============================================== -->
+            <div class="auth-pane" id="paneRegister" style="{% if active_tab != 'register' %}display: none;{% endif %}">
+                <div class="auth-pane-intro">
+                    <h2>Create Organizer Account</h2>
+                    <p>Already have an account? <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign in here</a></p>
+                </div>
+
+                <form method="POST" action="{{ url_for('auth.organizer_auth') }}" class="auth-modern-form">
+                    <input type="hidden" name="action" value="register">
+
+                    <div class="input-block">
+                        <label for="regOrg"><i class="fa-solid fa-building"></i> Organization / NGO / College Name <span class="req">*</span></label>
+                        <input type="text" id="regOrg" name="college_or_org" class="clean-input"
+                               placeholder="e.g. Ocean Hope Foundation / St. Xavier's Eco Cell" required value="{{ form_data.get('college_or_org', '') }}">
+                    </div>
+
+                    <div class="fields-grid-2">
+                        <div class="input-block">
+                            <label for="regFullName"><i class="fa-solid fa-user-tie"></i> Representative Name <span class="req">*</span></label>
+                            <input type="text" id="regFullName" name="full_name" class="clean-input"
+                                   placeholder="e.g. Pooja Deshmukh" required value="{{ form_data.get('full_name', '') }}">
+                        </div>
+
+                        <div class="input-block">
+                            <label for="regUsername"><i class="fa-solid fa-at"></i> Username <span class="req">*</span></label>
+                            <input type="text" id="regUsername" name="username" class="clean-input"
+                                   placeholder="ocean_hope_org" required minlength="3" value="{{ form_data.get('username', '') }}">
+                        </div>
+                    </div>
+
+                    <div class="input-block">
+                        <label for="regEmail"><i class="fa-solid fa-envelope"></i> Official Organization Email <span class="req">*</span></label>
+                        <input type="email" id="regEmail" name="email" class="clean-input"
+                               placeholder="contact@oceanhopefoundation.org" required value="{{ form_data.get('email', '') }}">
+                        <span class="input-hint">We'll dispatch drive updates and volunteer registrations directly to your email.</span>
+                    </div>
+
+                    <div class="fields-grid-2">
+                        <div class="input-block">
+                            <label for="regPhone"><i class="fa-solid fa-phone"></i> Official Phone Number</label>
+                            <input type="tel" id="regPhone" name="phone" class="clean-input"
+                                   placeholder="+91 98334 77889" value="{{ form_data.get('phone', '') }}">
+                        </div>
+
+                        <div class="input-block">
+                            <label for="regLocation"><i class="fa-solid fa-location-dot"></i> City / Headquarters</label>
+                            <input type="text" id="regLocation" name="location" class="clean-input"
+                                   placeholder="Goa / Mumbai" value="{{ form_data.get('location', '') }}">
+                        </div>
+                    </div>
+
+                    <div class="fields-grid-2">
+                        <div class="input-block">
+                            <label for="regPass"><i class="fa-solid fa-lock"></i> Password <span class="req">*</span></label>
+                            <div class="input-with-eye">
+                                <input type="password" id="regPass" name="password" class="clean-input"
+                                       placeholder="Min 6 characters" required minlength="6">
+                                <button type="button" class="eye-toggle" onclick="togglePass('regPass', 'eyeRegOrg1')">
+                                    <i class="fa-solid fa-eye" id="eyeRegOrg1"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="input-block">
+                            <label for="regConfirm"><i class="fa-solid fa-shield-check"></i> Confirm Password <span class="req">*</span></label>
+                            <div class="input-with-eye">
+                                <input type="password" id="regConfirm" name="confirm_password" class="clean-input"
+                                       placeholder="Repeat password" required minlength="6">
+                                <button type="button" class="eye-toggle" onclick="togglePass('regConfirm', 'eyeRegOrg2')">
+                                    <i class="fa-solid fa-eye" id="eyeRegOrg2"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Fast Auto-Fill for user testing -->
+                    <div class="quick-sample-row">
+                        <button type="button" class="btn-link-sample" onclick="fillOrganizerSampleRegister()">
+                            <i class="fa-solid fa-wand-magic-sparkles"></i> Auto-fill Sample Data for Fast Testing
+                        </button>
+                    </div>
+
+                    <button type="submit" class="btn-auth-action btn-organizer-action">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Create Account & Sign In
+                    </button>
+                </form>
+
+                <div class="pane-switch-footer">
+                    <span>Already have an organizer account?</span>
+                    <a href="javascript:void(0)" onclick="switchAuthTab('login')">Sign in here &rarr;</a>
+                </div>
+            </div>
+
+            <!-- Alternative Portal Switcher -->
+            <div class="portal-switch-box">
+                <span>Looking to participate as an individual volunteer?</span>
+                <a href="{{ url_for('auth.volunteer_auth') }}" class="switch-role-link">
+                    <i class="fa-solid fa-person-hiking"></i> Go to Volunteer Portal
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.auth-wrapper {
+    position: relative;
+    min-height: calc(100vh - 70px);
+    margin-top: 70px;
+    background: #081628;
+    color: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 1.5rem;
+    overflow: hidden;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+}
+
+.auth-ambient {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+}
+
+.glow-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(140px);
+    opacity: 0.35;
+}
+
+.orb-org-1 {
+    width: 600px;
+    height: 600px;
+    background: #028090;
+    top: -150px;
+    right: -150px;
+}
+
+.orb-org-2 {
+    width: 550px;
+    height: 550px;
+    background: #134074;
+    bottom: -150px;
+    left: -100px;
+}
+
+.auth-card-container {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 580px;
+}
+
+.auth-portal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+}
+
+.portal-back-home {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    transition: color 0.2s ease;
+}
+
+.portal-back-home:hover {
+    color: #ffffff;
+}
+
+.role-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.35rem 0.95rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+}
+
+.organizer-tag {
+    background: rgba(56, 189, 248, 0.15);
+    color: #38bdf8;
+    border: 1px solid rgba(56, 189, 248, 0.4);
+}
+
+.auth-main-card {
+    background: rgba(14, 32, 60, 0.92);
+    border: 1.5px solid rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(20px);
+    border-radius: 24px;
+    padding: 2.25rem;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+}
+
+.auth-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 14px;
+    padding: 0.35rem;
+    gap: 0.35rem;
+    margin-bottom: 2rem;
+}
+
+.auth-tab-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+    border: none;
+    background: transparent;
+    color: #94a3b8;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.auth-tab-btn:hover {
+    color: #ffffff;
+}
+
+.auth-tab-btn.active {
+    background: linear-gradient(135deg, #028090, #025a75);
+    color: #ffffff;
+    box-shadow: 0 4px 14px rgba(2, 128, 144, 0.4);
+}
+
+.auth-pane-intro {
+    margin-bottom: 1.75rem;
+}
+
+.auth-pane-intro h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.35rem;
+}
+
+.auth-pane-intro p {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    margin: 0;
+}
+
+.auth-pane-intro p a {
+    color: #38bdf8;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-pane-intro p a:hover {
+    text-decoration: underline;
+}
+
+.auth-modern-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+}
+
+.fields-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.input-block {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.input-block label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: #cbd5e1;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.input-block .req {
+    color: #f87171;
+}
+
+.label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.link-subtle {
+    font-size: 0.8rem;
+    color: #38bdf8;
+    text-decoration: none;
+}
+
+.clean-input {
+    width: 100%;
+    padding: 0.82rem 1.05rem;
+    background: rgba(8, 22, 40, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    color: #ffffff;
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.clean-input:focus {
+    border-color: #38bdf8;
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+    background: rgba(8, 22, 40, 0.95);
+}
+
+.input-hint {
+    font-size: 0.74rem;
+    color: #64748b;
+}
+
+.input-with-eye {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.eye-toggle {
+    position: absolute;
+    right: 0.85rem;
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    font-size: 0.95rem;
+}
+
+.eye-toggle:hover {
+    color: #cbd5e1;
+}
+
+.remember-row {
+    display: flex;
+    align-items: center;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    color: #94a3b8;
+    cursor: pointer;
+}
+
+.btn-auth-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 0.95rem 1.8rem;
+    border-radius: 12px;
+    border: none;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+}
+
+.btn-organizer-action {
+    background: linear-gradient(135deg, #028090, #134074);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(2, 128, 144, 0.4);
+}
+
+.btn-organizer-action:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(2, 128, 144, 0.5);
+}
+
+.demo-box {
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px dashed rgba(56, 189, 248, 0.4);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    text-align: center;
+}
+
+.demo-box-label {
+    font-size: 0.78rem;
+    color: #38bdf8;
+    font-weight: 700;
+    margin-bottom: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.btn-demo-fill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(56, 189, 248, 0.15);
+    border: 1px solid rgba(56, 189, 248, 0.4);
+    color: #38bdf8;
+    padding: 0.5rem 1.2rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.btn-demo-fill:hover {
+    background: rgba(56, 189, 248, 0.25);
+}
+
+.quick-sample-row {
+    text-align: right;
+    margin-top: -0.4rem;
+}
+
+.btn-link-sample {
+    background: none;
+    border: none;
+    color: #38bdf8;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.pane-switch-footer {
+    text-align: center;
+    font-size: 0.88rem;
+    color: #94a3b8;
+    margin-top: 1.5rem;
+}
+
+.pane-switch-footer a {
+    color: #38bdf8;
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 0.35rem;
+}
+
+.pane-switch-footer a:hover {
+    text-decoration: underline;
+}
+
+.portal-switch-box {
+    margin-top: 2rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+    color: #94a3b8;
+}
+
+.switch-role-link {
+    color: #02c39a;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.switch-role-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 600px) {
+    .fields-grid-2 {
+        grid-template-columns: 1fr;
+    }
+    .auth-main-card {
+        padding: 1.5rem;
+    }
+}
+</style>
+
+<script>
+function switchAuthTab(tab) {
+    const btnLogin = document.getElementById('tabBtnLogin');
+    const btnReg = document.getElementById('tabBtnRegister');
+    const paneLogin = document.getElementById('paneLogin');
+    const paneReg = document.getElementById('paneRegister');
+
+    if (tab === 'login') {
+        btnLogin.classList.add('active');
+        btnReg.classList.remove('active');
+        paneLogin.style.display = 'block';
+        paneReg.style.display = 'none';
+    } else {
+        btnReg.classList.add('active');
+        btnLogin.classList.remove('active');
+        paneLogin.style.display = 'none';
+        paneReg.style.display = 'block';
+    }
+}
+
+function togglePass(inputId, iconId) {
+    const el = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (el.type === 'password') {
+        el.type = 'text';
+        icon.classList.remove('fa-eye');
+        icon.classList.add('fa-eye-slash');
+    } else {
+        el.type = 'password';
+        icon.classList.remove('fa-eye-slash');
+        icon.classList.add('fa-eye');
+    }
+}
+
+function fillOrganizerDemo() {
+    document.getElementById('loginIdentifier').value = 'organizer@cleanshores.org';
+    document.getElementById('loginPassword').value = 'Demo@2026!';
+}
+
+function fillOrganizerSampleRegister() {
+    document.getElementById('regOrg').value = 'Ocean Hope Foundation (NGO)';
+    document.getElementById('regFullName').value = 'Pooja Deshmukh';
+    document.getElementById('regUsername').value = 'ocean_hope_ngo';
+    document.getElementById('regEmail').value = 'pooja@oceanhopefoundation.org';
+    document.getElementById('regPhone').value = '+91 98334 77889';
+    document.getElementById('regLocation').value = 'Goa, Calangute Coast';
+    document.getElementById('regPass').value = 'CleanShores2026!';
+    document.getElementById('regConfirm').value = 'CleanShores2026!';
+}
+</script>
+{% endblock %}

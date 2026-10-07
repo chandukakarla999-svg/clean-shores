@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% block title %}Organizer Verification{% endblock %}
+{% block body_class %}dashboard-page{% endblock %}
+
+{% block content %}
+<div class="dashboard-layout">
+    {% include 'organizer/_sidebar.html' %}
+    <div class="dashboard-main">
+        <div class="dashboard-topbar">
+            <div>
+                <h1 class="dashboard-page-title">Organizer Verification</h1>
+                <p class="dashboard-page-sub">Submit your organization credentials to get verified and start publishing drives.</p>
+            </div>
+        </div>
+
+        <!-- Status Card -->
+        {% if verification %}
+        <div class="verif-status-card verif-status-{{ verification.status }}">
+            <div class="verif-status-icon">
+                {% if verification.status == 'verified' %}✅
+                {% elif verification.status == 'pending' %}⏳
+                {% elif verification.status == 'rejected' %}❌
+                {% else %}📋{% endif %}
+            </div>
+            <div class="verif-status-body">
+                <strong>Verification Status: {{ verification.status.upper() }}</strong>
+                <p>
+                    {% if verification.status == 'verified' %}
+                    Congratulations! Your organization is verified. You can now create public cleanup drives with a Verified badge.
+                    {% elif verification.status == 'pending' %}
+                    Your application is under review by our admin team. This usually takes 24–48 hours.
+                    {% elif verification.status == 'rejected' %}
+                    Your application was rejected. {{ 'Admin remarks: ' + verification.admin_remarks if verification.admin_remarks else '' }} Please update and resubmit.
+                    {% endif %}
+                </p>
+                <small>Submitted: {{ verification.submitted_at.strftime('%B %d, %Y at %I:%M %p') }}</small>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if not verification or verification.status in ('unverified', 'rejected') %}
+        <div class="form-card">
+            <form method="POST" action="{{ url_for('organizer.verification') }}" enctype="multipart/form-data">
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">1</div>
+                        <h3>Organization Details</h3>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Organization / Initiative Name *</label>
+                            <input type="text" name="org_name" class="form-input" required
+                                   value="{{ verification.org_name if verification else user.college_or_org or '' }}"
+                                   placeholder="E.g., Clean Ocean Foundation">
+                        </div>
+                        <div class="form-group">
+                            <label>Organization Type *</label>
+                            <select name="org_type" class="form-select" required>
+                                {% for ot in ['NGO', 'College / Institute', 'Community Group', 'Eco Club', 'Individual Initiator', 'Government Body', 'Corporate CSR'] %}
+                                <option value="{{ ot }}" {% if verification and verification.org_type == ot %}selected{% endif %}>{{ ot }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Registration / Affiliation Number</label>
+                            <input type="text" name="reg_number" class="form-input"
+                                   value="{{ verification.reg_number if verification else '' }}"
+                                   placeholder="NGO Darpan / Trust / College Affiliation No.">
+                        </div>
+                        <div class="form-group">
+                            <label>Website / Social Link</label>
+                            <input type="url" name="website" class="form-input"
+                                   value="{{ verification.website if verification else '' }}"
+                                   placeholder="https://yourorg.org">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Organization Address</label>
+                        <textarea name="address" class="form-textarea" rows="3"
+                                  placeholder="Full registered address of your organization">{{ verification.address if verification else '' }}</textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <div class="form-section-header">
+                        <div class="form-section-num">2</div>
+                        <h3>Contact & Proof Documents</h3>
+                    </div>
+                    <div class="form-grid-2">
+                        <div class="form-group">
+                            <label>Contact Person Name</label>
+                            <input type="text" name="contact_person" class="form-input"
+                                   value="{{ verification.contact_person if verification else user.full_name }}"
+                                   placeholder="Name of primary contact">
+                        </div>
+                        <div class="form-group">
+                            <label>Contact Phone</label>
+                            <input type="tel" name="contact_phone" class="form-input"
+                                   value="{{ verification.contact_phone if verification else user.phone or '' }}"
+                                   placeholder="+91 98765 43210">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Supporting Document</label>
+                        <div class="file-upload-zone">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                            <p>Upload Registration Certificate, Letterhead, or ID Proof</p>
+                            <span>PDF, JPG, PNG — Max 10MB</span>
+                            <input type="file" name="id_doc" accept=".pdf,.jpg,.jpeg,.png,.webp" class="file-input-hidden">
+                        </div>
+                        {% if verification and verification.id_doc_filename %}
+                        <p class="upload-note"><i class="fa-solid fa-check"></i> Previously uploaded: {{ verification.id_doc_filename }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary-action">
+                        <i class="fa-solid fa-paper-plane"></i>
+                        {{ 'Resubmit Application' if verification else 'Submit for Verification' }}
+                    </button>
+                </div>
+            </form>
+        </div>
+        {% elif verification.status == 'pending' %}
+        <div class="pending-info-card">
+            <h3>📋 Submitted Information</h3>
+            <div class="info-grid">
+                <div><strong>Organization:</strong> {{ verification.org_name }}</div>
+                <div><strong>Type:</strong> {{ verification.org_type }}</div>
+                <div><strong>Reg No:</strong> {{ verification.reg_number or 'N/A' }}</div>
+                <div><strong>Contact:</strong> {{ verification.contact_person }}</div>
+                <div><strong>Phone:</strong> {{ verification.contact_phone or 'N/A' }}</div>
+                <div><strong>Website:</strong> {{ verification.website or 'N/A' }}</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
